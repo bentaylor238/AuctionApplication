@@ -2,9 +2,9 @@
   ### /docs/
     This will contain all documentation information
   ### /src/
-    #### /frontend/
+    /frontend/
       This will contain all the code for the front end
-    #### /backend/
+    /backend/
       This will contain all the code for the back end
 ## Version-control procedures
   We will be using Git. 
