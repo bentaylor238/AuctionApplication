@@ -1,10 +1,10 @@
 ## An explanation of the organization and name scheme for the workspace
-  # /docs/
+  ### /docs/
     This will contain all documentation information
-  # /src/
-    /frontend/
+  ### /src/
+    #### /frontend/
       This will contain all the code for the front end
-    /backend/
+    #### /backend/
       This will contain all the code for the back end
 ## Version-control procedures
   We will be using Git. 
