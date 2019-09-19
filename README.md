@@ -1,6 +1,6 @@
 ## An explanation of the organization and name scheme for the workspace
   ### /docs/
-    This will contain all documentation information
+    This will contain all documentation information 
   ### /src/
     /frontend/
       This will contain all the code for the front end
