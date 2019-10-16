@@ -1,0 +1,22 @@
+Setup instructions
+------------------
+install python 3 (not anaconda)
+  https://www.python.org/downloads/
+  verify: type python or python3 in terminal
+
+install pip (python package manager)
+  I have included the get-pip.py file in the repo
+  in terminal run:
+    python (or python3) get-pip.py
+  
+install pipenv (an upgraded version of pip)
+  pip install pipenv
+
+From this point, anytime we want to install any python package (such as django) we have to activate our environment
+To activate, run:
+  pipenv shell
+
+Install django in environment
+  pipenv install django
+
+you should be ready to roll
