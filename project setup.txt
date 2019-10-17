@@ -12,11 +12,12 @@ install pip (python package manager)
 install pipenv (an upgraded version of pip)
   pip install pipenv
 
-From this point, anytime we want to install any python package (such as django) we have to activate our environment
-To activate, run:
-  pipenv shell
+from this point, anytime we need to add packages (such as django) we need to use our environment
+to active the env:
+  pipenv sell
 
-Install django in environment
-  pipenv install django
+our pip file has a list of all the packages that we need for the project, aka our dependencies, (including django)
+to install all dependencies, run:
+  pipenv install
 
 you should be ready to roll
