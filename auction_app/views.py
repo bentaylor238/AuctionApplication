@@ -1,3 +1,7 @@
 from django.shortcuts import render
+# from .models
 
-# Create your views here.
+
+def index(request):
+    context={}
+    return render(request, 'auction_app/index.html', context)
