@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
 {% block content %}
   <h1>{{rules.title}}</h1>
   <h3>{{rules.lastModified}}</h3>
@@ -6,4 +8,8 @@
   {{rules.rulesContent}}
   <h3>Announcements</h3>
   {{rules.announcementsContent}}
+
+  {% comment %} example of a crispy django form {% endcomment %}
+  {% csrf_token %}
+  {% crispy form %}
 {% endblock %}

@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from auction_app.models import Rules
 from django.utils import timezone
+from .forms import RulesForm
 
 def home(request):
     context={'admin':True}#data to send to the html page goes here
@@ -21,7 +22,10 @@ def payment(request):
 def rules(request):
     if Rules.objects.count() == 0:
         setDefaultRules()
-    context = {"rules": Rules.objects.all().get(pk=1)}
+    context = {
+        "admin":True,
+        "rules": Rules.objects.all().get(pk=1),
+        "form":RulesForm()}
     return render(request, 'rules.html', context)
 
 def setDefaultRules():
