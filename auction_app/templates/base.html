@@ -1,0 +1,19 @@
+{% load static %}
+<!DOCTYPE html>
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static "css/style.css" %}"
+    {% block headerTag %}
+    {% endblock %}
+</head>
+<body>
+    <header class="flex-row">
+        {% if not loginPage %}
+        <a href="{% url "home" %}" class="header"> 
+            <img src="{% static "img/homeIcon.png" %}" alt="home" id="homeIcon"/>
+        </a>
+        {% endif %}
+        <h1 class="header">Auction App</h1>
+    </header>
+    {% block content %}
+    {% endblock %}
+</body>
