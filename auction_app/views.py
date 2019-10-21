@@ -25,10 +25,10 @@ def rules(request):
     return render(request, 'rules.html', context)
 
 def setDefaultRules():
-    f = open('auction_app/static/auction_app/defaultRules.txt', 'r')
+    f = open('auction_app/static/txt/defaultRules.txt', 'r')
     defaultRules = f.read()
     f.close()
-    f = open('auction_app/static/auction_app/defaultAnnouncements.txt', 'r')
+    f = open('auction_app/static/txt/defaultAnnouncements.txt', 'r')
     defaultAnnouncements = f.read()
     f.close()
     rules = Rules(title="Rules & Announcements",

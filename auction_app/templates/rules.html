@@ -1,4 +1,9 @@
 {% extends 'base.html' %}
 {% block content %}
-    rules page
+  <h1>{{rules.title}}</h1>
+  <h3>{{rules.lastModified}}</h3>
+  <h3>Rules</h3>
+  {{rules.rulesContent}}
+  <h3>Announcements</h3>
+  {{rules.announcementsContent}}
 {% endblock %}
