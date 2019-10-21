@@ -1,30 +1,30 @@
 from django.shortcuts import render
 
 
-def index(request):
-    context={}
-    return render(request, 'index.html', context)
+def home(request):
+    context={'admin':True}#data to send to the html page goes here
+    return render(request, 'home.html', context)
 
 def live(request):
-    context={}
+    context={}#data to send to the html page goes here
     return render(request, 'live.html', context)
 
 def login(request):
-    context={}
+    context={}#data to send to the html page goes here
     return render(request, 'login.html', context)
 
 def payment(request):
-    context={}
+    context={}#data to send to the html page goes here
     return render(request, 'payment.html', context)
 
 def rules(request):
-    context={}
+    context={}#data to send to the html page goes here
     return render(request, 'rules.html', context)
 
 def silent(request):
-    context={}
+    context={}#data to send to the html page goes here
     return render(request, 'silent.html', context)
 
 def users(request):
-    context={}
+    context={}#data to send to the html page goes here
     return render(request, 'users.html', context)
