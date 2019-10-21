@@ -1,5 +1,6 @@
 from django.shortcuts import render
-
+from auction_app.models import Rules
+from django.utils import timezone
 
 def home(request):
     context={'admin':True}#data to send to the html page goes here
@@ -18,8 +19,24 @@ def payment(request):
     return render(request, 'payment.html', context)
 
 def rules(request):
-    context={}#data to send to the html page goes here
+    if Rules.objects.count() == 0:
+        setDefaultRules()
+    context = {"rules": Rules.objects.all().get(pk=1)}
     return render(request, 'rules.html', context)
+
+def setDefaultRules():
+    f = open('auction_app/static/auction_app/defaultRules.txt', 'r')
+    defaultRules = f.read()
+    f.close()
+    f = open('auction_app/static/auction_app/defaultAnnouncements.txt', 'r')
+    defaultAnnouncements = f.read()
+    f.close()
+    rules = Rules(title="Rules & Announcements",
+                  lastModified=timezone.now(),
+                  rulesContent=defaultRules,
+                  announcementsContent=defaultAnnouncements
+                  )
+    rules.save()
 
 def silent(request):
     context={}#data to send to the html page goes here
