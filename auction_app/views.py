@@ -2,20 +2,20 @@ from django.shortcuts import render
 from auction_app.models import Rules
 from django.utils import timezone
 
-def index(request):
-    context={}
-    return render(request, 'index.html', context)
+def home(request):
+    context={'admin':True}#data to send to the html page goes here
+    return render(request, 'home.html', context)
 
 def live(request):
-    context={}
+    context={}#data to send to the html page goes here
     return render(request, 'live.html', context)
 
 def login(request):
-    context={}
+    context={'loginPage': True}#data to send to the html page goes here
     return render(request, 'login.html', context)
 
 def payment(request):
-    context={}
+    context={}#data to send to the html page goes here
     return render(request, 'payment.html', context)
 
 def rules(request):
@@ -39,9 +39,9 @@ def setDefaultRules():
     rules.save()
 
 def silent(request):
-    context={}
+    context={}#data to send to the html page goes here
     return render(request, 'silent.html', context)
 
 def users(request):
-    context={}
+    context={}#data to send to the html page goes here
     return render(request, 'users.html', context)

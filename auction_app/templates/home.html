@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h3> home page </h3>  
+    {% if admin %}
+        {% comment %} Admin {% endcomment %}
+        <a href="{% url "rules" %}"> rules</a> <br>
+        <a href="{% url "live" %}"/> live auction</a> <br>
+        <a href="{% url "silent" %}"/> silent auction</a> <br>
+        <a href="{% url "users" %}"/> users</a> <br>
+        <a href="{% url "payment" %}"/> payment</a> <br>
+    {% else %}
+        {% comment %} regular user {% endcomment %}
+        <a href="{% url "rules" %}"> rules</a> <br>
+        <a href="{% url "live" %}"/> live auction</a> <br>
+        <a href="{% url "silent" %}"/> silent auction</a> <br>
+    {% endif %}
+{% endblock %}
