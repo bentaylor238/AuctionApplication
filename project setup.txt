@@ -19,5 +19,5 @@ to active the env:
 our pip file has a list of all the packages that we need for the project, aka our dependencies, (including django)
 to install all dependencies, run:
   pipenv install
-
+zq1
 you should be ready to roll
