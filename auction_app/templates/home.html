@@ -1,8 +1,5 @@
-<!DOCTYPE html>
-<head>
-
-</head>
-<body>
+{% extends 'base.html' %}
+{% block content %}
     <h3> home page </h3>  
     {% if admin %}
         {% comment %} Admin {% endcomment %}
@@ -17,5 +14,4 @@
         <a href="{% url "live" %}"/> live auction</a> <br>
         <a href="{% url "silent" %}"/> silent auction</a> <br>
     {% endif %}
-
-</body>
+{% endblock %}

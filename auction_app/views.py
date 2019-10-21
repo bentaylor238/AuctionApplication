@@ -10,7 +10,7 @@ def live(request):
     return render(request, 'live.html', context)
 
 def login(request):
-    context={}#data to send to the html page goes here
+    context={'loginPage': True}#data to send to the html page goes here
     return render(request, 'login.html', context)
 
 def payment(request):
