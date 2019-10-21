@@ -1,6 +1,12 @@
-# ignore ~ hidden files
-~*
+*~
 db.sqlite3*
 .idea
 *.pyc
 .vscode
+venv
+.DS_Store
+.vscode
+__pycache__
+*.csv
+*.zip
+*.bak
