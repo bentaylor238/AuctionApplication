@@ -38,4 +38,8 @@ class Bid(models.Model):
     item = models.ForeignKey(SilentItem, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
+class Auction(models.Model):
+    items = models.ForeignKey(Item, on_delete=models.CASCADE)
+    type = models.CharField(max_length=200, default='')
+
 
