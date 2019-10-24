@@ -1,6 +1,10 @@
 from django.shortcuts import render
-from auction_app.models import Rules
+from auction_app.models import Rules, User
 from django.utils import timezone
+from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
+from django.urls import reverse
+
+
 
 def home(request):
     context={'admin':True}#data to send to the html page goes here
@@ -45,3 +49,26 @@ def silent(request):
 def users(request):
     context={}#data to send to the html page goes here
     return render(request, 'users.html', context)
+
+def login(request):
+    context={}#data to send to the html page goes here
+    for key in request.GET:
+        print(f"\t{key} => {request.GET[key]}")
+
+    username = None
+    password = None
+
+    if 'username' in request.GET:
+        username = request.GET['username']
+    if 'password' in request.GET:
+        password = request.GET['password']
+
+    try:
+        user = User.objects.get(username=username)
+    except:
+        return JsonResponse({'error': 'The given username is not in our database :('})
+
+    if user.password == password:
+        return HttpResponseRedirect(reverse('auction_app:rules'))
+    else:
+        return JsonResponse({'error': 'The given password does not match the username :('})
