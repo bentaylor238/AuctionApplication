@@ -2,7 +2,7 @@
 {% block content %}
     <div class="container">
         <h2>Login</h2>
-        <form action="{% url 'auction_app:login' %}" method="get">
+        <form action="{% url 'login' %}" method="get">
             <label for="uname"><b>Username</b></label>
             <input type="text" placeholder="Enter Username" id="username" name="uname" required>
 
@@ -13,9 +13,10 @@
         </form>
 
         <h2>Create Account</h2>
-        <form action="{% url 'auction_app:create_account' %}" method="post">
+        <form action="{% url 'create_account' %}" method="post">
             {% csrf_token %}
-            <label for="username"><b>Username</b></label>
+            {{ create_account_form}}
+            {% comment %} <label for="username"><b>Username</b></label>
             <input type="text" placeholder="Enter Username" id="uname" name="username" required>
 
             <label for="email"><b>Email Address</b></label>
@@ -25,7 +26,7 @@
             <input type="password" placeholder="Enter Password" id="password1" name="password" required>
 
             <label for="password"><b>Re-type Password</b></label>
-            <input type="password" placeholder="Re-type Password" id="password2" name="password" required>
+            <input type="password" placeholder="Re-type Password" id="password2" name="password" required> {% endcomment %}
 
             <button type="submit">Create Account</button>
         </form>

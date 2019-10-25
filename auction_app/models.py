@@ -1,6 +1,11 @@
+from django.db import models
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
 import datetime
 
-from django.db import models
+class Auction(models.Model):
+    published = models.BooleanField(default=False)
+    type = models.CharField( max_length=50)
 
 class Item(models.Model):
     class Meta:
@@ -9,13 +14,15 @@ class Item(models.Model):
     # user = models.ForeignKey(User, on_delete=models.CASCADE)
     description = models.CharField(max_length=200, default='')
     date = models.DateTimeField(datetime.datetime.now(), default=datetime.datetime.now())
+    imageName = models.CharField(max_length=50, default='')
+    auction = models.ForeignKey(Auction, on_delete=models.CASCADE, null=True, blank=True)
 
 class SilentItem(Item):
-    start = models.DateTimeField()
-    end = models.DateTimeField()
+    start = models.DateTimeField(default=None, blank=True, null=True)
+    end = models.DateTimeField(default=None, blank=True, null=True)
 
 class LiveItem(Item):
-    orderinqueue = models.IntegerField()
+    orderInQueue = models.IntegerField()
 
 class Rules(models.Model):
     title = models.CharField(max_length=200)
@@ -28,18 +35,19 @@ class Rules(models.Model):
 class User(models.Model):
     name = models.CharField(max_length=200, default='')
     username = models.CharField(max_length=200, default='')
-    id = models.IntegerField(default=0)
+    auction_number = models.IntegerField(default=None, blank=True, null=True)
     email = models.EmailField(max_length=200, default='')
     password = models.CharField(max_length=200, default='')
-    silentItem = models.ForeignKey(SilentItem, on_delete=models.CASCADE)
+    # silentItem = models.ForeignKey(SilentItem, on_delete=models.CASCADE)
 
 class Bid(models.Model):
     amount = models.IntegerField(default=0)
     item = models.ForeignKey(SilentItem, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
-class Auction(models.Model):
-    items = models.ForeignKey(Item, on_delete=models.CASCADE)
-    type = models.CharField(max_length=200, default='')
+# class SilentAuction(models.Model):
+#     published = models.BooleanField(default=False)
 
+# class LiveAuction(models.Model):
+#     published = models.BooleanField(default=False)
 
