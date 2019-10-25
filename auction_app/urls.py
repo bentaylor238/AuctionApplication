@@ -10,5 +10,6 @@ urlpatterns = [
     path('users', views.users, name='users'),
     path('payment', views.payment, name='payment'),
     path('login', views.login, name='login'),
+    path('create_account', views.create_account, name='create_account'),
     path('rules', views.rules, name='rules'),
 ]

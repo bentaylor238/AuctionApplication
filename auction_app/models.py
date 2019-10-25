@@ -35,10 +35,10 @@ class Rules(models.Model):
 class User(models.Model):
     name = models.CharField(max_length=200, default='')
     username = models.CharField(max_length=200, default='')
-    auction_number = models.IntegerField(default=0)
+    auction_number = models.IntegerField(default=None, blank=True, null=True)
     email = models.EmailField(max_length=200, default='')
     password = models.CharField(max_length=200, default='')
-    silentItem = models.ForeignKey(SilentItem, on_delete=models.CASCADE)
+    # silentItem = models.ForeignKey(SilentItem, on_delete=models.CASCADE)
 
 class Bid(models.Model):
     amount = models.IntegerField(default=0)

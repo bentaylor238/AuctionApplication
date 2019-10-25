@@ -13,5 +13,7 @@ class RulesForm(forms.ModelForm):
 class CreateAccount(forms.Form):
     first_name = forms.CharField(label='First Name', max_length=50)
     last_name = forms.CharField(label='Last Name', max_length=50)
+    username = forms.CharField(label='User Name', max_length=50)
+    email = forms.CharField(label="Email", max_length=100)
     password = forms.CharField(label='Password', max_length=100)
     confirm_password = forms.CharField(label='Confirm Password', max_length=100)
