@@ -1,8 +1,9 @@
 from django.shortcuts import render
 from auction_app.models import Rules, User
 from django.utils import timezone
+from .forms import *
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
-from django.urls import reverse
+from django.shortcuts import redirect
 #from django.contrib.auth.models import User
 #from django.contrib.auth import authenticate
 
@@ -27,7 +28,10 @@ def payment(request):
 def rules(request):
     if Rules.objects.count() == 0:
         setDefaultRules()
-    context = {"rules": Rules.objects.all().get(pk=1)}
+    context = {
+        "admin":True,
+        "rules": Rules.objects.all().get(pk=1),
+        "form":RulesForm()}
     return render(request, 'rules.html', context)
 
 def setDefaultRules():
@@ -53,7 +57,10 @@ def users(request):
     return render(request, 'users.html', context)
 
 def login(request):
-    context={}#data to send to the html page goes here
+    context={
+        #data to send to the html page goes here
+        'create_account_form': CreateAccount(),
+    }
     for key in request.GET:
         print(f"\t{key} => {request.GET[key]}")
 
@@ -63,22 +70,22 @@ def login(request):
     if 'username' in request.GET:
         uname = request.GET['username']
     else:
-        return HttpResponseRedirect(reverse('auction_app:login'))
+        return render(request, 'login.html', context)
     if 'password' in request.GET:
         psw = request.GET['password']
     else:
-        return HttpResponseRedirect(reverse('auction_app:login'))
+        return render(request, 'login.html', context)
 
     try:
         user = User.objects.get(username=uname)
     except:
-        return HttpResponseRedirect(reverse('auction_app:login'))
+        return render(request, 'login.html', context)
         #return JsonResponse({'error': 'The given username is not in our database :('})
 
     if user.password == psw:
-        return HttpResponseRedirect(reverse('auction_app:rules'))
+        return redirect(rules)
     else:
-        return  HttpResponseRedirect(reverse('auction_app:login'))
+        return render(request, 'login.html', context)
         #return JsonResponse({'error': 'The given password does not match the username :('})
 
     """
@@ -94,32 +101,40 @@ def create_account(request):
         print(f"\t{key} => {request.POST[key]}")
 
     username = None
+    firstname = ''
+    lastname = ''
     email = None
     password1 = None
     password2 = None
 
-    if 'uname' in request.POST:
-        username = request.POST['uname']
+    if 'username' in request.POST:
+        username = request.POST['username']
     else:
-        return HttpResponseRedirect(reverse('auction_app:login'))
+        return redirect(login)
     if 'email' in request.POST:
         email = request.POST['email']
     else:
-        return HttpResponseRedirect(reverse('auction_app:login'))
+        return redirect(login)
 
-    if 'password1' in request.POST:
-        password1 = request.POST['password1']
+    if 'password' in request.POST:
+        password1 = request.POST['password']
     else:
-        return HttpResponseRedirect(reverse('auction_app:login'))
-    if 'password2' in request.POST:
-        password2 = request.POST['password2']
+        return redirect(login)
+    if 'confirm_password' in request.POST:
+        password2 = request.POST['confirm_password']
     else:
-        return HttpResponseRedirect(reverse('auction_app:login'))
+        return redirect(login)
+    if 'first_name' in request.POST:
+        firstname = request.POST['first_name']
+    if 'last_name' in request.POST:
+        lastname = request.POST['last_name']
+    
 
     if password1 == password2 and password1 != None:
-        new_user = User(username=username, email=email, password=password1,)
+        new_user = User(name=firstname+" "+lastname, username=username, email=email, password=password1)
         new_user.save()
-        return HttpResponseRedirect(reverse('auction_app:rules'))
+        print("user created: " + username)
+        return redirect(rules)
         '''try:
             user = User.objects.create_user(username, email=username,password=password1)
             user.save()
