@@ -1,29 +1,33 @@
 {% extends 'base.html' %}
 {% block content %}
     <div class="container">
-        <label for="uname"><b>Username</b></label>
-        <input type="text" placeholder="Enter Username" name="uname" required>
+        <h2>Login</h2>
+        <form action="{% url 'auction_app:login' %}" method="get">
+            <label for="uname"><b>Username</b></label>
+            <input type="text" placeholder="Enter Username" id="username" name="uname" required>
 
-        <label for="psw"><b>Password</b></label>
-        <input type="password" placeholder="Enter Password" name="psw" required>
-
-        <button type="submit">Login</button>
+            <label for="password"><b>Password</b></label>
+            <input type="password" placeholder="Enter Password" id="password" name="psw" required>
+            <p id="message"></p>
+            <button type="submit">Login</button>
+        </form>
 
         <h2>Create Account</h2>
+        <form action="{% url 'auction_app:create_account' %}" method="post">
+            {% csrf_token %}
+            <label for="username"><b>Username</b></label>
+            <input type="text" placeholder="Enter Username" id="uname" name="username" required>
 
-        <label for="username"><b>Username</b></label>
-        <input type="text" placeholder="Enter Username" name="username" required>
+            <label for="email"><b>Email Address</b></label>
+            <input type="email" placeholder="Enter Email Address" id="email" name="email" required>
 
-        <label for="email"><b>Email Address</b></label>
-        <input type="email" placeholder="Enter Email Address" name="email" required>
+            <label for="password"><b>Password</b></label>
+            <input type="password" placeholder="Enter Password" id="password1" name="password" required>
 
-        <label for="password"><b>Password</b></label>
-        <input type="password" placeholder="Enter Password" name="password" required>
+            <label for="password"><b>Re-type Password</b></label>
+            <input type="password" placeholder="Re-type Password" id="password2" name="password" required>
 
-        <label for="password"><b>Re-type Password</b></label>
-        <input type="password" placeholder="Re-type Password" name="password" required>
-
-        <label for="createaccount"><b>Create Account</b></label>
-        <button type="submit">Create Account</button>
+            <button type="submit">Create Account</button>
+        </form>
     </div>
 {% endblock %}

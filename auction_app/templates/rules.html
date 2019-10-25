@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load crispy_forms_tags %}
+{% comment %} {% load crispy_forms_tags %} {% endcomment %}
 
 {% block content %}
   <h1>{{rules.title}}</h1>
@@ -11,5 +11,5 @@
 
   {% comment %} example of a crispy django form {% endcomment %}
   {% csrf_token %}
-  {% crispy form %}
+  {{ form }}
 {% endblock %}
