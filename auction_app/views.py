@@ -18,7 +18,7 @@ def live(request):
     return render(request, 'live.html', context)
 
 def login(request):
-    context={'loginPage': True}#data to send to the html page goes here
+    context={}#data to send to the html page goes here
     return render(request, 'login.html', context)
 
 def payment(request):
@@ -56,37 +56,40 @@ def users(request):
     context={}#data to send to the html page goes here
     return render(request, 'users.html', context)
 
-def login(request):
+def login(request, login_form=Login(), create_account_form=CreateAccount()):
     context={
         #data to send to the html page goes here
-        'create_account_form': CreateAccount(),
+        'login_form': login_form,
+        'create_account_form': create_account_form,
+        'loginPage': True
     }
     for key in request.GET:
         print(f"\t{key} => {request.GET[key]}")
 
-    uname = None
-    psw = None
+    username = None
+    password = None
+    return render(request, 'login.html', context)
 
-    if 'username' in request.GET:
-        uname = request.GET['username']
-    else:
-        return render(request, 'login.html', context)
-    if 'password' in request.GET:
-        psw = request.GET['password']
-    else:
-        return render(request, 'login.html', context)
+    # if 'username' in request.GET:
+    #     username = request.GET['username']
+    # else:
+    #     return render(request, 'login.html', context)
+    # if 'password' in request.GET:
+    #     password = request.GET['password']
+    # else:
+    #     return render(request, 'login.html', context)
 
-    try:
-        user = User.objects.get(username=uname)
-    except:
-        return render(request, 'login.html', context)
-        #return JsonResponse({'error': 'The given username is not in our database :('})
+    # try:
+    #     user = User.objects.get(username=username)
+    # except:
+    #     return render(request, 'login.html', context)
+    #     #return JsonResponse({'error': 'The given username is not in our database :('})
 
-    if user.password == psw:
-        return redirect(rules)
-    else:
-        return render(request, 'login.html', context)
-        #return JsonResponse({'error': 'The given password does not match the username :('})
+    # if user.password == password:
+    #     return redirect(rules)
+    # else:
+    #     return render(request, 'login.html', context)
+    #     #return JsonResponse({'error': 'The given password does not match the username :('})
 
     """
         user = authenticate(username=username, password=password)
@@ -95,20 +98,30 @@ def login(request):
         else:
             # No user exists
     """
-
 def create_account(request):
     for key in request.POST:
         print(f"\t{key} => {request.POST[key]}")
 
-    username = None
-    firstname = ''
-    lastname = ''
-    email = None
-    password1 = None
-    password2 = None
+    if request.method == 'POST':
+        create_account_form = CreateAccount(request.POST)
+        if create_account_form.is_valid():
+            username = request.POST['new_username']
+            email = request.POST['email']
+            password = request.POST['new_password']
+            firstname = request.POST['first_name']
+            lastname = request.POST['last_name']
+            new_user = User(name=firstname+" "+lastname, username=username, email=email, password=password)
+            new_user.save()
+            print("user created: " + username)
+            return redirect(rules)
+        else:
+            #call the login view passing in the form to render
+            return login(request, create_account_form=create_account_form)
+            
 
-    if 'username' in request.POST:
-        username = request.POST['username']
+
+    if 'new_username' in request.POST:
+        username = request.POST['new_username']
     else:
         return redirect(login)
     if 'email' in request.POST:
@@ -116,8 +129,8 @@ def create_account(request):
     else:
         return redirect(login)
 
-    if 'password' in request.POST:
-        password1 = request.POST['password']
+    if 'new_password' in request.POST:
+        password1 = request.POST['new_password']
     else:
         return redirect(login)
     if 'confirm_password' in request.POST:
@@ -141,5 +154,4 @@ def create_account(request):
         except:
             print("Something went wrong in creating the user")
             # no idea at the moment how to handle
-    #not sure how to handle any of the else statements yet
-'''
+    #not sure how to handle any of the else statements yet'''

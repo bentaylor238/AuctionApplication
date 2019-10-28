@@ -3,19 +3,25 @@
     <div class="container">
         <h2>Login</h2>
         <form action="{% url 'login' %}" method="get">
-            <label for="uname"><b>Username</b></label>
+            {% csrf_token %}
+            <table>
+                {{login_form.as_table}}
+            </table>
+            {% comment %} <label for="uname"><b>Username</b></label>
             <input type="text" placeholder="Enter Username" id="username" name="uname" required>
 
             <label for="password"><b>Password</b></label>
             <input type="password" placeholder="Enter Password" id="password" name="psw" required>
-            <p id="message"></p>
+            <p id="message"></p> {% endcomment %}
             <button type="submit">Login</button>
         </form>
 
         <h2>Create Account</h2>
         <form action="{% url 'create_account' %}" method="post">
             {% csrf_token %}
-            {{ create_account_form}}
+            <table>
+                {{ create_account_form.as_table }}
+            </table>
             {% comment %} <label for="username"><b>Username</b></label>
             <input type="text" placeholder="Enter Username" id="uname" name="username" required>
 
