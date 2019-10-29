@@ -17,3 +17,6 @@ class CreateAccount(forms.Form):
     email = forms.CharField(label="Email", max_length=100)
     password = forms.CharField(label='Password', max_length=100)
     confirm_password = forms.CharField(label='Confirm Password', max_length=100)
+
+class BidForm(forms.Form):
+    amount = forms.FloatField(label='Amount in $:')

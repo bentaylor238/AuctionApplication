@@ -1,5 +1,7 @@
+import datetime
+
 from django.shortcuts import render
-from auction_app.models import Rules, User
+from auction_app.models import Rules, User, SilentItem, Bid
 from django.utils import timezone
 from .forms import *
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
@@ -49,7 +51,22 @@ def setDefaultRules():
     rules.save()
 
 def silent(request):
-    context={}#data to send to the html page goes here
+
+    b = SilentItem(title='log', description='a nice big log', imageName='alogpic', start=datetime.datetime.now())
+    a = SilentItem(title='feet', description='a pair of feet', imageName='feets', start=datetime.datetime.now())
+    c = SilentItem(title='nothing', description='a whole lot of nothing', imageName='nullspace', start=datetime.datetime.now())
+    d = SilentItem(title='taco', description='a little old but edible', imageName='tacopic', start=datetime.datetime.now())
+    b.save()
+    a.save()
+    c.save()
+    d.save()
+
+    items = SilentItem.objects.all()
+    # bids = Bid.objects.filter(item=SilentItem)
+
+    context={
+        'items': items
+    }#data to send to the html page goes here
     return render(request, 'silent.html', context)
 
 def users(request):
@@ -143,3 +160,17 @@ def create_account(request):
             # no idea at the moment how to handle
     #not sure how to handle any of the else statements yet
 '''
+
+
+def submit_bid(request):
+    amount = None
+    for key in request.POST:
+        print(f"\t{key} => {request.POST[key]}")
+
+    if 'amount' in request.POST:
+        amount = request.POST['amount']
+
+    if amount is not None:
+        new_bid = Bid(amount=amount)
+        new_bid.save()
+    return redirect(silent)

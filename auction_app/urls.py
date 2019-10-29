@@ -12,4 +12,5 @@ urlpatterns = [
     path('login', views.login, name='login'),
     path('create_account', views.create_account, name='create_account'),
     path('rules', views.rules, name='rules'),
+    path('submit_bid', views.submit_bid, name='submit_bid'),
 ]

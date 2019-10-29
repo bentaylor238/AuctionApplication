@@ -50,4 +50,3 @@ class Bid(models.Model):
 
 # class LiveAuction(models.Model):
 #     published = models.BooleanField(default=False)
-
