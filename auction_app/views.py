@@ -52,8 +52,8 @@ def setDefaultRules():
 
 def silent(request):
 
-    b = SilentItem(title='log', description='a nice big log', imageName='alogpic', start=datetime.datetime.now())
-    a = SilentItem(title='feet', description='a pair of feet', imageName='feets', start=datetime.datetime.now())
+    b = SilentItem(title='trampoline', description='a nice big trampoline', imageName='tramppic', start=datetime.datetime.now())
+    a = SilentItem(title='basketball', description='a flat basketball', imageName='ballpic', start=datetime.datetime.now())
     c = SilentItem(title='nothing', description='a whole lot of nothing', imageName='nullspace', start=datetime.datetime.now())
     d = SilentItem(title='taco', description='a little old but edible', imageName='tacopic', start=datetime.datetime.now())
     b.save()
@@ -165,12 +165,14 @@ def create_account(request):
 def submit_bid(request):
     amount = None
     for key in request.POST:
-        print(f"\t{key} => {request.POST[key]}")
+        print('#####', key, request.POST[key])
 
-    if 'amount' in request.POST:
-        amount = request.POST['amount']
+    if 'submit_bid' in request.POST:
+        amount = request.POST['submit_bid']
 
     if amount is not None:
+        print('#####', amount)
         new_bid = Bid(amount=amount)
         new_bid.save()
+        # print('#####', new_bid.amount)
     return redirect(silent)
