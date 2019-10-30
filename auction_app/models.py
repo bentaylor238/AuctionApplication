@@ -41,7 +41,7 @@ class User(models.Model):
     # silentItem = models.ForeignKey(SilentItem, on_delete=models.CASCADE)
 
 class Bid(models.Model):
-    amount = models.IntegerField(default=0)
+    amount = models.FloatField(default=0)
     item = models.ForeignKey(SilentItem, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
