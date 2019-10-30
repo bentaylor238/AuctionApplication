@@ -30,8 +30,9 @@ def rules(request):
         rules.save()
     else:
         rules = Rules.objects.get()
+
     if request.method == "POST":
-        form = RulesForm(request.POST, instance=rules)
+        form = RulesForm(request.POST, instance=rules) # this way, we save a rules object to the db via a RulesForm
         form.save()
         return redirect(home)
     else:
