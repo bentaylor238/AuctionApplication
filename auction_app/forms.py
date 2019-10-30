@@ -1,17 +1,13 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from .models import Rules, User
-
-# from crispy_forms.helper import FormHelper
+from .models import Rules, AuctionUser
 
 class RulesForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super(RulesForm, self).__init__(*args, **kwargs)
-        # self.helper = FormHelper()
     class Meta:
         model = Rules
-        fields = ('title', 'rulesContent', 'announcementsContent')
+        fields = ('title', 'rules_content', 'announcements_content')
 
+#SAVED FOR AN EXAMPLE, NOT USED
 # class CreateAccount(forms.Form):
 #     first_name = forms.CharField(label='First Name', max_length=50)
 #     last_name = forms.CharField(label='Last Name', max_length=50)
@@ -50,10 +46,10 @@ class Login(forms.Form):
 
 class CreateAccount(UserCreationForm):
     class Meta:
-        model = User
-        fields = ('username', 'email')
+        model = AuctionUser
+        fields = ('first_name','last_name', 'username','email',)
 
 class UpdateAccount(UserChangeForm):
     class Meta:
-        model = User
-        fields = ('username', 'email')
+        model = AuctionUser
+        fields = ('first_name','last_name', 'username','email','auction_number')

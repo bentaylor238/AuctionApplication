@@ -121,6 +121,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-LOGIN_REDIRECT_URL = 'rules'
+LOGIN_REDIRECT_URL = 'afterLogin'
 LOGOUT_REDIRECT_URL = 'login'
-AUTH_USER_MODEL = 'auction_app.User'
+AUTH_USER_MODEL = 'auction_app.AuctionUser'

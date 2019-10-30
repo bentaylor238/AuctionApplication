@@ -1,14 +1,16 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import User
 from .forms import CreateAccount, UpdateAccount
 
-from .models import User
+from .models import AuctionUser, Rules
 
-class UserAdmin(UserAdmin):
+class AuctionUserAdmin(UserAdmin):
     add_form = CreateAccount
     form = UpdateAccount
-    model = User
-    list_display = ['email', 'username',]
+    model = AuctionUser
+    # list_display = ['first_name','last_name','email',]
 
-admin.site.register(User, UserAdmin)
+admin.site.register(AuctionUser, AuctionUserAdmin)
+admin.site.register(Rules)
