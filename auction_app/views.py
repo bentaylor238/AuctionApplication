@@ -4,13 +4,16 @@ from django.utils import timezone
 from .forms import *
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.shortcuts import redirect
+from django.contrib.auth.forms import UserCreationForm
+from django.urls import reverse_lazy
+from django.views import generic
 #from django.contrib.auth.models import User
 #from django.contrib.auth import authenticate
 
 
 
 def home(request):
-    context={'admin':True}#data to send to the html page goes here
+    context={'admin':False}#data to send to the html page goes here
     return render(request, 'home.html', context)
 
 def live(request):
@@ -57,15 +60,20 @@ def users(request):
     return render(request, 'users.html', context)
 
 def login(request, login_form=Login(), create_account_form=CreateAccount()):
-    context={
-        #data to send to the html page goes here
-        'login_form': login_form,
-        'create_account_form': create_account_form,
-        'loginPage': True
-    }
-    for key in request.GET:
-        print(f"\t{key} => {request.GET[key]}")
-
+    if request.method == 'POST':
+        for key in request.GET:
+            print(f"\t{key} => {request.GET[key]}")
+        login_form = Login(request.POST)
+        if login_form.is_valid():
+            return redirect(rules)
+        else:
+            context={
+                #data to send to the html page goes here
+                'login_form': login_form, #defaults to a blank Login() object
+                'create_account_form': create_account_form, #defaults to a blank CreateAccount() object
+                'loginPage': True
+            }
+            return render(request, 'login.html', context)
     username = None
     password = None
     return render(request, 'login.html', context)
@@ -98,13 +106,15 @@ def login(request, login_form=Login(), create_account_form=CreateAccount()):
         else:
             # No user exists
     """
+
 def create_account(request):
-    for key in request.POST:
-        print(f"\t{key} => {request.POST[key]}")
 
     if request.method == 'POST':
+        for key in request.POST:
+            print(f"\t{key} => {request.POST[key]}")
         create_account_form = CreateAccount(request.POST)
         if create_account_form.is_valid():
+            #create user model and save
             username = request.POST['new_username']
             email = request.POST['email']
             password = request.POST['new_password']
@@ -118,36 +128,6 @@ def create_account(request):
             #call the login view passing in the form to render
             return login(request, create_account_form=create_account_form)
             
-
-
-    if 'new_username' in request.POST:
-        username = request.POST['new_username']
-    else:
-        return redirect(login)
-    if 'email' in request.POST:
-        email = request.POST['email']
-    else:
-        return redirect(login)
-
-    if 'new_password' in request.POST:
-        password1 = request.POST['new_password']
-    else:
-        return redirect(login)
-    if 'confirm_password' in request.POST:
-        password2 = request.POST['confirm_password']
-    else:
-        return redirect(login)
-    if 'first_name' in request.POST:
-        firstname = request.POST['first_name']
-    if 'last_name' in request.POST:
-        lastname = request.POST['last_name']
-    
-
-    if password1 == password2 and password1 != None:
-        new_user = User(name=firstname+" "+lastname, username=username, email=email, password=password1)
-        new_user.save()
-        print("user created: " + username)
-        return redirect(rules)
         '''try:
             user = User.objects.create_user(username, email=username,password=password1)
             user.save()
@@ -155,3 +135,8 @@ def create_account(request):
             print("Something went wrong in creating the user")
             # no idea at the moment how to handle
     #not sure how to handle any of the else statements yet'''
+
+class SignUp(generic.CreateView):
+    form_class = UserCreationForm
+    success_url = reverse_lazy('rules')
+    template_name = 'signup.html'

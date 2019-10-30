@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.auth.models import AbstractUser
 import datetime
 
 class Auction(models.Model):
@@ -32,13 +33,19 @@ class Rules(models.Model):
     def __str__(self):
         return self.title
 
-class User(models.Model):
+class User(AbstractUser):
     name = models.CharField(max_length=200, default='')
-    username = models.CharField(max_length=200, default='')
-    auction_number = models.IntegerField(default=None, blank=True, null=True)
     email = models.EmailField(max_length=200, default='')
-    password = models.CharField(max_length=200, default='')
-    # silentItem = models.ForeignKey(SilentItem, on_delete=models.CASCADE)
+
+
+# class User(models.Model):
+#     name = models.CharField(max_length=200, default='')
+#     username = models.CharField(max_length=200, default='')
+#     auction_number = models.IntegerField(default=None, blank=True, null=True)
+#     email = models.EmailField(max_length=200, default='')
+#     password = models.CharField(max_length=200, default='')
+#     is_admin = models.BooleanField(default=False)
+#     # silentItem = models.ForeignKey(SilentItem, on_delete=models.CASCADE)
 
 class Bid(models.Model):
     amount = models.FloatField(default=0)
