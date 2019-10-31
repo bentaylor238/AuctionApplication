@@ -7,7 +7,7 @@ from django.shortcuts import redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.urls import reverse_lazy
 from django.views import generic
-#from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 #from django.contrib.auth import authenticate
 
 
@@ -59,7 +59,8 @@ def silent(request):
     return render(request, 'silent.html', context)
 
 def users(request):
-    context={}#data to send to the html page goes here
+    users = AuctionUser.objects.all()
+    context={"users": users}#data to send to the html page goes here
     return render(request, 'users.html', context)
 
 def afterLogin(request):

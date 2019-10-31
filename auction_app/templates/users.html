@@ -1,4 +1,18 @@
 {% extends 'base.html' %}
 {% block content %}
-    users page
+    <table>
+        {% if users %}
+            {% for user in users %}
+                <table>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.auctionnumber }}</td>
+                    <td>{{ user.password }}</td>
+                    <td>{{ user.name }}</td>
+                </table>
+            {% endfor %}
+        {% else %}
+            <strong>There are currently no Users</strong>
+        {% endif %}
+    </table>
 {% endblock %}
