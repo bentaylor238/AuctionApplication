@@ -1,3 +1,5 @@
 from django.contrib import admin
+from .models import SilentItem, Bid
 
-# Register your models here.
+admin.site.register(SilentItem)
+admin.site.register(Bid)

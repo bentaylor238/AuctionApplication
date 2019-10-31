@@ -30,4 +30,16 @@ class CreateAccount(forms.Form):
 class Login(forms.Form):
     username = forms.CharField(label='User Name', max_length=50)
     password = forms.CharField(widget=forms.PasswordInput())
+
+class BidForm(forms.Form):
+    amount = forms.FloatField(label='bid', required=False)
+
+    def clean_amount(self):
+        data = self.cleaned_data['amount']
+        if data < 0:
+            raise forms.ValidationError("Cannot enter in negative values")
+
+        # Always return a value to use as the new cleaned data, even if
+        # this method didn't change it.
+        return data
     

@@ -1,4 +1,25 @@
 {% extends 'base.html' %}
 {% block content %}
     silent auction page
+    <br>
+        {% if items %}
+                {% for item in items %}
+                    <div style="width: 350px; height: 210px; border: solid 1px #ccc; display: inline-block;">
+                    <h2>{{ item.title }}</h2>
+                    <p>{{ item.description }}</p>
+                    <p>{{ item.imageName }}</p>
+<!--                    <p>Current Bid: {{ bid.amount }}</p>-->
+
+                    <form action="{% url 'submit_bid' %}" method="post">
+                        {% csrf_token %}
+                        {{ bidform.as_p }}
+<!--                        <input type="hidden" name="item_id" value="{{item.id}}" />-->
+                        <button type="submit">Bid</button>
+                    </form>
+
+                    </div>
+                {% endfor %}
+        {% else %}
+            <strong>There are no categories present.</strong>
+        {% endif %}
 {% endblock %}

@@ -1,5 +1,7 @@
+import datetime
+
 from django.shortcuts import render
-from auction_app.models import Rules, User
+from auction_app.models import Rules, User, SilentItem, Bid
 from django.utils import timezone
 from .forms import *
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
@@ -49,7 +51,57 @@ def setDefaultRules():
     rules.save()
 
 def silent(request):
-    context={}#data to send to the html page goes here
+
+    b = SilentItem(title='trampoline', description='a nice big trampoline', imageName='tramppic')
+    a = SilentItem(title='basketball', description='a flat basketball', imageName='ballpic')
+    c = SilentItem(title='nothing', description='a whole lot of nothing', imageName='nullspace')
+    d = SilentItem(title='taco', description='a little old but edible', imageName='tacopic')
+    b.save()
+    a.save()
+    c.save()
+    d.save()
+
+    items = SilentItem.objects.all()
+    # bids = Bid.objects.filter(item=SilentItem)
+
+    context={
+        'bidform': BidForm(),
+        'items': items
+    }#data to send to the html page goes here
+    return render(request, 'silent.html', context)
+
+def submit_bid(request):
+    context = {}
+    if request.method == 'POST':
+        # for key in request.POST:
+        #     print(f"\t{key} => {request.GET[key]}")
+        for key in request.POST:
+            print(' ##### ', key)
+        amount = request.POST['amount']
+        # id = request.POST['item_id']
+        # create new form
+        bid = BidForm(request.POST)
+        if bid.is_valid():
+            # create a bid object
+            # item = SilentItem.objects.get(id=id)
+            item = SilentItem(title='filler', description='filler', imageName='filler')
+            user = User()
+            user.save()
+            item.save()
+            new_bid = Bid(amount=amount, item=item, user=user)
+            new_bid.save()
+            context = {
+                # 'bid': new_bid,
+                'bidform': BidForm(),
+                'items': SilentItem.objects.all()
+            }
+        else:
+            # this means invalid data was posted
+            context = {
+                # 'bid': Bid(),
+                'bidform': bid,
+                'items': SilentItem.objects.all()
+            }
     return render(request, 'silent.html', context)
 
 def users(request):
