@@ -8,7 +8,7 @@
                     <h2>{{ item.title }}</h2>
                     <p>{{ item.description }}</p>
                     <p>{{ item.imageName }}</p>
-<!--                    <p>Current Bid: {{ bid.amount }}</p>-->
+                    <p>Current Bid: {{ bids.forloop.counter0.amount }}</p>
 
                     <form action="{% url 'submit_bid' %}" method="post">
                         {% csrf_token %}
