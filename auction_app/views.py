@@ -52,10 +52,17 @@ def setDefaultRules():
 
 def silent(request):
 
+<<<<<<< HEAD
     b = SilentItem(title='trampoline', description='a nice big trampoline', imageName='tramppic')
     a = SilentItem(title='basketball', description='a flat basketball', imageName='ballpic')
     c = SilentItem(title='nothing', description='a whole lot of nothing', imageName='nullspace')
     d = SilentItem(title='taco', description='a little old but edible', imageName='tacopic')
+=======
+    b = SilentItem(title='trampoline', description='a nice big trampoline', imageName='tramppic', start=datetime.datetime.now())
+    a = SilentItem(title='basketball', description='a flat basketball', imageName='ballpic', start=datetime.datetime.now())
+    c = SilentItem(title='nothing', description='a whole lot of nothing', imageName='nullspace', start=datetime.datetime.now())
+    d = SilentItem(title='taco', description='a little old but edible', imageName='tacopic', start=datetime.datetime.now())
+>>>>>>> 4c7817e1d8062b7d5920463813ba471c9494bbb9
     b.save()
     a.save()
     c.save()
@@ -65,6 +72,7 @@ def silent(request):
     # bids = Bid.objects.filter(item=SilentItem)
 
     context={
+<<<<<<< HEAD
         'bidform': BidForm(),
         'items': items
     }#data to send to the html page goes here
@@ -102,6 +110,10 @@ def submit_bid(request):
                 'bidform': bid,
                 'items': SilentItem.objects.all()
             }
+=======
+        'items': items
+    }#data to send to the html page goes here
+>>>>>>> 4c7817e1d8062b7d5920463813ba471c9494bbb9
     return render(request, 'silent.html', context)
 
 def users(request):
@@ -206,4 +218,25 @@ def create_account(request):
         except:
             print("Something went wrong in creating the user")
             # no idea at the moment how to handle
+<<<<<<< HEAD
     #not sure how to handle any of the else statements yet'''
+=======
+    #not sure how to handle any of the else statements yet
+'''
+
+
+def submit_bid(request):
+    amount = None
+    for key in request.POST:
+        print('#####', key, request.POST[key])
+
+    if 'submit_bid' in request.POST:
+        amount = request.POST['submit_bid']
+
+    if amount is not None:
+        print('#####', amount)
+        new_bid = Bid(amount=amount)
+        new_bid.save()
+        # print('#####', new_bid.amount)
+    return redirect(silent)
+>>>>>>> 4c7817e1d8062b7d5920463813ba471c9494bbb9
