@@ -8,23 +8,14 @@
                     <h2>{{ item.title }}</h2>
                     <p>{{ item.description }}</p>
                     <p>{{ item.imageName }}</p>
-<<<<<<< HEAD
 <!--                    <p>Current Bid: {{ bid.amount }}</p>-->
 
                     <form action="{% url 'submit_bid' %}" method="post">
                         {% csrf_token %}
                         {{ bidform.as_p }}
-<!--                        <input type="hidden" name="item_id" value="{{item.id}}" />-->
-=======
-
-                    <form action="{% url 'submit_bid' %}" method="get">
-                        <label for="bid"><b>Bid</b></label>
-                        <input type="bid" placeholder="Enter Bid" id="bid" name="bid" required>
-                        <p id="message"></p>
->>>>>>> 4c7817e1d8062b7d5920463813ba471c9494bbb9
+                        <input type="hidden" name="item_id" value="{{item.id}}" />
                         <button type="submit">Bid</button>
                     </form>
-
                     </div>
                 {% endfor %}
         {% else %}

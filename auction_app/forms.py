@@ -29,7 +29,6 @@ class CreateAccount(forms.Form):
 
 class Login(forms.Form):
     username = forms.CharField(label='User Name', max_length=50)
-<<<<<<< HEAD
     password = forms.CharField(widget=forms.PasswordInput())
 
 class BidForm(forms.Form):
@@ -44,11 +43,9 @@ class BidForm(forms.Form):
         # this method didn't change it.
         return data
     
-=======
     email = forms.CharField(label="Email", max_length=100)
     password = forms.CharField(label='Password', max_length=100)
     confirm_password = forms.CharField(label='Confirm Password', max_length=100)
 
 class BidForm(forms.Form):
     amount = forms.FloatField(label='Amount in $:')
->>>>>>> 4c7817e1d8062b7d5920463813ba471c9494bbb9
