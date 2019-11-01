@@ -31,7 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'crispy_forms',
+    # 'crispy_forms',
     'auction_app',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -120,3 +120,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+LOGIN_REDIRECT_URL = 'afterLogin'
+LOGOUT_REDIRECT_URL = 'login'
+AUTH_USER_MODEL = 'auction_app.AuctionUser'

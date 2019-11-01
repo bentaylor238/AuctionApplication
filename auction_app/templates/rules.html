@@ -2,14 +2,21 @@
 {% comment %} {% load crispy_forms_tags %} {% endcomment %}
 
 {% block content %}
-  <h1>{{rules.title}}</h1>
-  <h3>{{rules.lastModified}}</h3>
-  <h3>Rules</h3>
-  {{rules.rulesContent}}
-  <h3>Announcements</h3>
-  {{rules.announcementsContent}}
-
-  {% comment %} example of a crispy django form {% endcomment %}
-  {% csrf_token %}
-  {{ form }}
+  {% if user.is_superuser%}  
+    <form action="{% url 'rules' %}" method="post">
+      <table> 
+        {% csrf_token %}
+        {{ form }}
+      </table>
+      <button type='submit'>Save</button>
+    </form>
+  {% else %}
+    <h1>{{rules.title}}</h1>
+    <h3>{{rules.last_modified}}</h3>
+    <h3>Rules</h3>
+    {{rules.rules_content}}
+    <h3>Announcements</h3>
+    {{rules.announcements_content}}
+    <a href="{% url 'home'%}">Home Page</a>
+  {% endif %}
 {% endblock %}

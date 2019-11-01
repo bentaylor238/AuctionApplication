@@ -1,2 +1,1 @@
-- After placing a bid on a silent item, a bidder may not retract the bid under any circumstance.
-- A bidder is responsible to pay for all items they win, regardless of the total cost. Therefore, it is advisable to not bid frivolously assuming that you will be out-bid by another bidder.
+These are the default rules
