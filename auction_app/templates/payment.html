@@ -1,4 +1,22 @@
 {% extends 'base.html' %}
 {% block content %}
-    payment page
-{% endblock %}
+    <table>
+        {% if users %}
+        <tr>
+            <td>First Name</td>
+            <td>Last Name</td>
+            <td>Email</td>
+            <td>Auction Number</td>
+        </tr>
+            {% for user in users %}
+                <tr>
+                    <td>{{ user.first_name }}</td>
+                    <td>{{ user.last_name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.auction_number }}</td>
+                </tr>
+            {% endfor %}
+        {% else %}
+            <strong>There are currently no Users</strong>
+        {% endif %}
+    </table>{% endblock %}

@@ -2,17 +2,41 @@
 {% block content %}
     <table>
         {% if users %}
+        <tr>
+            <td>First Name</td>
+            <td>Last Name</td>
+            <td>Username</td>
+            <td>Email</td>
+            <td>Auction Number</td>
+        </tr>
             {% for user in users %}
-                <table>
+                <tr>
+                    <td>{{ user.first_name }}</td>
+                    <td>{{ user.last_name }}</td>
                     <td>{{ user.username }}</td>
                     <td>{{ user.email }}</td>
-                    <td>{{ user.auctionnumber }}</td>
-                    <td>{{ user.password }}</td>
-                    <td>{{ user.name }}</td>
-                </table>
+                    <td>{{ user.auction_number }}</td>
+                    <td>
+                        <form method="post" action="updateAuctionNumber">
+                            {% csrf_token %}
+                            <label>Auction Number</label>
+                            <input type="text" name="auction_number">
+                            <label>Username</label>
+                            <input type="text" name="username">
+                            <button type="submit">Update Auction Number</button>
+                        </form>
+                    </td>
+                </tr>
             {% endfor %}
         {% else %}
             <strong>There are currently no Users</strong>
         {% endif %}
+        <tr>
+            <form method="post">
+                {% csrf_token %}
+                {{form}}
+                <button type="submit">Create User</button>
+            </form>
+        </tr>
     </table>
 {% endblock %}
