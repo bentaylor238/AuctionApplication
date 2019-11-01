@@ -51,14 +51,37 @@ def setDefaultRules():
     rules.save()
 
 def silent(request):
-    # bids = Bid.objects.filter(item=SilentItem)
 
-    context={
-        'bids': Bid.objects.all(),
+    context = {
         'bidform': BidForm(),
-        'items': SilentItem.objects.all()
+        'itembid': getItemBid()
     }
     return render(request, 'silent.html', context)
+
+
+def getItemBid():
+    mylist = []
+    # bidlist needs to be a list of bids, one for each item, where the returned bid is is the highest amount for that item
+    bidlist = getHighestBid()
+    itemlist = list(SilentItem.objects.all())
+    for i in range(len(SilentItem.objects.all())):
+        mylist.append((bidlist[i], itemlist[i]))
+    return mylist
+
+
+def getHighestBid(): # returns list of one bid per item, where the bid is the highest amount
+    items = SilentItem.objects.all()
+    list = []
+    tracker = 0.0
+    highestbid = Bid()
+    for item in items:
+        bids = Bid.objects.filter(item=item)
+        for bid in bids:
+            if bid.amount > tracker:
+                highestbid = bid
+        list.append(highestbid)
+        tracker = 0.0
+
 
 def submit_bid(request):
     context = {}
@@ -71,33 +94,33 @@ def submit_bid(request):
         bidform = BidForm(request.POST)
         if bidform.is_valid():
             # create a bid object
-            print('USER === ', request.user)
-            bid = Bid.objects.get(item=SilentItem.objects.get(id=id))
-            bid.amount = amount
-            # bid.user = User.objects.get() # TODO: get user somehow here
-            bid.user = User.objects.get(name='user2')
-            bid.save()
+            print('USER === ', request.user.username)
+            # bid = Bid.objects.get(item=SilentItem.objects.get(id=id))
+            new_bid = Bid(item=SilentItem.objects.get(id=id), amount=amount, user=User.objects.get(name=request.user.username)) # TODO: get user somehow here
+            new_bid.save()
+            # bid.amount = amount
+            # # bid.user = User.objects.get()
+            # bid.user = User.objects.get(name='user2')
+            # bid.save()
             context = {
-                'bids': Bid.objects.all(),
                 'bidform': BidForm(),
-                'items': SilentItem.objects.all()
+                'itembid': getItemBid()
             }
         else:
             # this means invalid data was posted
             context = {
-                'bids': Bid.objects.all(),
                 'bidform': bidform,
-                'items': SilentItem.objects.all()
+                'itembid': getItemBid()
             }
     return render(request, 'silent.html', context)
 
 def users(request):
-    context={}#data to send to the html page goes here
+    context = {} # data to send to the html page goes here
     return render(request, 'users.html', context)
 
 def login(request, login_form=Login(), create_account_form=CreateAccount()):
-    context={
-        #data to send to the html page goes here
+    context = {
+        # data to send to the html page goes here
         'login_form': login_form,
         'create_account_form': create_account_form,
         'loginPage': True
@@ -154,7 +177,7 @@ def create_account(request):
             print("user created: " + username)
             return redirect(rules)
         else:
-            #call the login view passing in the form to render
+            # call the login view passing in the form to render
             return login(request, create_account_form=create_account_form)
             
 
