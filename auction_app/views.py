@@ -61,10 +61,26 @@ def silent(request):
 
 def users(request):
     users = AuctionUser.objects.all()
-    userForm = CreateAccount()
-    context={"users": users,
-             "form": userForm}#data to send to the html page goes here
-    return render(request, 'users.html', context)
+    form = CreateAccountForm()
+    if request.method == 'POST':
+        form = CreateAccountForm(request.POST)
+        #This part is what's broken, fix this to get password auto put into form
+        # form.cleaned_data['password1'] = "ax7!bwaBc"
+        # form.cleaned_data['password2'] = "ax7!bwaBc"
+        if form.is_valid(): #passing passwords hiddenly so this should work
+            #save data
+            print("test\n")
+            form.save()
+        else:
+            context = {
+                "users": users,
+                "form":form}
+            return render(request, 'users.html', context)
+    else:
+        #first visit
+        context={"users": users,
+                 "form": form}#data to send to the html page goes here
+        return render(request, 'users.html', context)
 
 def afterLogin(request):
     if request.user.is_superuser:
@@ -127,6 +143,14 @@ def updateAuctionNumber(request):
 
      
 class CreateAccount(generic.CreateView):
-    form_class = CreateAccount
+    form_class = CreateAccountForm
     success_url = reverse_lazy('afterLogin')
     template_name = 'createAccount.html'
+
+    # def form_valid(self, form):
+    #     #This method is called when valid form data has been POSTed.
+    #     #It should return an HttpRespons
+    #     if form.password:
+    #         return super().form_valid(form)
+    #     else:
+    #         return #something
