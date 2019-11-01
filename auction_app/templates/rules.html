@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-{% comment %} {% load crispy_forms_tags %} {% endcomment %}
 
 {% block content %}
   {% if user.is_superuser%}  
@@ -12,11 +11,11 @@
     </form>
   {% else %}
     <h1>{{rules.title}}</h1>
-    <h3>{{rules.lastModified}}</h3>
+    <h3>{{rules.last_modified}}</h3>
     <h3>Rules</h3>
-    {{rules.rulesContent}}
+    {{rules.rules_content}}
     <h3>Announcements</h3>
-    {{rules.announcementsContent}}
+    {{rules.announcements_content}}
     <a href="{% url 'home'%}">Home Page</a>
   {% endif %}
 {% endblock %}
