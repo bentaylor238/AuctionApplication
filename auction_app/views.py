@@ -44,7 +44,22 @@ def init_test_db(request):
                 rules_content="Insert rules here",
                 announcements_content="Insert announcements here"
         ).save()
-        return HttpResponse("Success")
+        silentAuction = Auction(type="silent")
+        silentAuction.save()
+        liveAuction = Auction(type="live")
+        liveAuction.save()
+        for i in range(10):
+            item = SilentItem(
+                title=randomString(), 
+                description=randomString(), 
+                imageName=randomString(), 
+                auction=silentAuction
+            )
+            item.save()
+            user = AuctionUser.objects.all().first()
+            user.save()
+            bid = Bid(amount=0, user=user, item=item).save()
+        return redirect(login)
     else:
         return HttpResponseNotFound()
 
@@ -83,18 +98,6 @@ def rules(request):
         }
     return render(request, 'rules.html', context)
 
-@login_required
-def createMockItems():
-    for i in range(10):
-        auction = Auction.objects.all()[0]
-        item = SilentItem(title=randomString(), description=randomString(), imageName=randomString(), auction=auction)
-        user = AuctionUser.objects.all()[0]
-        item.save()
-        user.save()
-        bid = Bid(amount=0, user=user, item=item)
-        bid.save()
-
-@login_required
 def randomString(stringLength=10):
     letters = string.ascii_lowercase
     return ''.join(random.choice(letters) for i in range(stringLength))
@@ -102,15 +105,12 @@ def randomString(stringLength=10):
 @login_required                    
 def silent(request):
 
-    createMockItems()
-
     context = {
         'bidform': BidForm(),
         'itembid': getItemBid()
     }
     return render(request, 'silent.html', context)
 
-@login_required
 def getItemBid():
     mylist = []
     # bidlist needs to be a list of bids, one for each item, where the returned bid is is the highest amount for that item
@@ -120,7 +120,6 @@ def getItemBid():
         mylist.append((bidlist[i], itemlist[i]))
     return mylist
 
-@login_required
 def getHighestBid(): # returns list of one bid per item, where the bid is the highest amount
     list = []
     tracker = 0.0
