@@ -3,6 +3,7 @@ from django.contrib import admin
 from . import views
 
 urlpatterns = [
+    path('init_test_db', views.init_test_db, name="init_test_db"),
     path('index', views.home, name='home'),
     path('home', views.home, name='home'),
     path('live', views.live, name='live'),

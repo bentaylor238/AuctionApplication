@@ -44,12 +44,12 @@ class RulesForm(forms.ModelForm):
 #                 #add validation error to specific form element
 #                 self.add_error('username', 'Username does not exist')
 
-class CreateAccount(UserCreationForm):
+class CreateAccountForm(UserCreationForm):
     class Meta:
         model = AuctionUser
         fields = ('first_name','last_name', 'username','email',)
 
-class UpdateAccount(UserChangeForm):
+class UpdateAccountForm(UserChangeForm):
     class Meta:
         model = AuctionUser
         fields = ('first_name','last_name', 'username','email','auction_number',)

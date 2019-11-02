@@ -2,19 +2,35 @@ from django.shortcuts import render
 from auction_app.models import Rules, AuctionUser
 from django.utils import timezone
 from .forms import *
-from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
+from django.http import HttpResponse, JsonResponse, HttpResponseRedirect, HttpResponseNotFound
 from django.shortcuts import redirect
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login
 from django.urls import reverse_lazy
 from django.views import generic
-#from django.contrib.auth.models import User
-#from django.contrib.auth import authenticate
-
-
+from .settings import *
 
 def home(request):
     context={}#data to send to the html page goes here
     return render(request, 'home.html', context)
+
+def init_test_db(request):
+    if DEBUG:
+        AuctionUser(
+            username="user1",
+            password="passpass",
+            email="email@email.com",
+            first_name="tommy",
+            last_name="thompson",
+            auction_number=20,
+        ).save()
+        Rules(title="Rules & Announcements",
+                last_modified=timezone.now(),
+                rules_content="Insert rules here",
+                announcements_content="Insert announcements here")
+        return HttpResponse("Success")
+    else:
+        return HttpResponseNotFound()
 
 def live(request):
     context={}#data to send to the html page goes here
@@ -25,41 +41,27 @@ def payment(request):
     return render(request, 'payment.html', context)
 
 def rules(request):
-    if Rules.objects.count() == 0:
-        rules = getDefaultRules()
-        rules.save()
-    else:
-        rules = Rules.objects.get()
-
     if request.method == "POST":
         form = RulesForm(request.POST, instance=rules) # this way, we save a rules object to the db via a RulesForm
         form.save()
         return redirect(home)
     else:
-        form = RulesForm(instance=rules)
-        context = {
-            "rules": rules,
-            "form":form}
-        return render(request, 'rules.html', context)
+        try:
+            pass
+        except:
+            pass
+    form = RulesForm(instance=rules)
+    context = {
+        "rules": rules,
+        "form":form}
+    return render(request, 'rules.html', context)
 
-def getDefaultRules():
-    f = open('auction_app/static/txt/defaultRules.txt', 'r')
-    defaultRules = f.read()
-    f.close()
-    f = open('auction_app/static/txt/defaultAnnouncements.txt', 'r')
-    defaultAnnouncements = f.read()
-    f.close()
-    return Rules(title="Rules & Announcements",
-                last_modified=timezone.now(),
-                rules_content=defaultRules,
-                announcements_content=defaultAnnouncements)
-                    
 def silent(request):
     context={}#data to send to the html page goes here
     return render(request, 'silent.html', context)
 
 def users(request):
-    context={}#data to send to the html page goes here
+    context={"form":CreateAccountForm()}#data to send to the html page goes here
     return render(request, 'users.html', context)
 
 def afterLogin(request):
@@ -112,6 +114,6 @@ def afterLogin(request):
 
      
 class CreateAccount(generic.CreateView):
-    form_class = CreateAccount
+    form_class = CreateAccountForm
     success_url = reverse_lazy('afterLogin')
     template_name = 'createAccount.html'
