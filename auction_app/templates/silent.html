@@ -2,21 +2,28 @@
 {% block content %}
     silent auction page
     <br>
-    {% if itembid %}
-        {% for bid, item, form in itembid %}
-            <div style="width: 350px; height: 210px; border: solid 1px #ccc; display: inline-block;">
-            <h2>Title: {{ item.title }}</h2>
-            <p>Description: {{ item.description }}</p>
-            <p>Image Name: {{ item.imageName }}</p>
-            <p>Current Bid: {{ bid.amount }}</p>
-
-            <form action="{% url 'submit_bid' %}" method="post">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <input type="hidden" name="item_id" value="{{ item.id }}" />
-                <button type="submit">Bid</button>
-            </form>
-            </div>
+    {% if objects %}
+        {% for object, title in objects %}
+            <h2>{{ title }}</h2>
+            {% if object %}
+                {% for bid, item, form in object %}
+                    <div style="width: 350px; height: 210px; border: solid 1px #ccc; display: inline-block;">
+                    <h2>Title: {{ item.title }}</h2>
+                    <p>Description: {{ item.description }}</p>
+                    <p>Image Name: {{ item.imageName }}</p>
+                    <p>Current Bid: {{ bid.amount }}</p>
+                    <form action="{% url 'submit_bid' %}" method="post">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <input type="hidden" name="item_id" value="{{ item.id }}" />
+                        <button type="submit">Bid</button>
+                    </form>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <strong>No items match the criteria</strong>
+            {% endif %}
+            <br>
         {% endfor %}
     {% else %}
         <strong>No items match the criteria</strong>

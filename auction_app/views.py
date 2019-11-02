@@ -80,9 +80,8 @@ def silent(request):
     #
     # createMockItems()
 
-    context = {
-        'itembid': getBidItemForm()
-    }
+    context = getContextSilent(request)
+
     return render(request, 'silent.html', context)
 
 
@@ -127,10 +126,42 @@ def submit_bid(request):
         else:
             # this means invalid data was posted
             print("invalid data")
-        context = {
-            'itembid': getBidItemForm()
-        }
+
+        context = getContextSilent(request)
+
     return render(request, 'silent.html', context)
+
+
+def getContextSilent(request):
+    print('#####', request.user.username)
+    context = {
+        'objects': getCategories(request),
+    }
+    return context
+
+
+def getCategories(request):
+    biditemform = getBidItemForm()
+    winning = []
+    bidon = []
+    unbid = []
+    for bid, item, form in biditemform:
+        if str(bid.user) == str(request.user.username):
+            winning.append((bid, item, form))
+        elif userHasBidOn(item, request):
+            bidon.append((bid, item, form))
+        else:
+            unbid.append((bid, item, form))
+    return (winning, 'Winning'), (bidon, 'Bid On'), (unbid, 'Not Bid On')
+
+
+def userHasBidOn(item, request):
+    bids = Bid.objects.filter(item=item)
+    for bid in bids:
+        if str(bid.user) == str(request.user.username) and bid.amount != 0.0:
+            return True
+    return False
+
 
 def users(request):
     users = AuctionUser.objects.all()
