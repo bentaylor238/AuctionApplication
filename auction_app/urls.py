@@ -3,6 +3,7 @@ from django.contrib import admin
 from . import views
 
 urlpatterns = [
+    path('submit_bid', views.submit_bid, name='submit_bid'),
     path('index', views.home, name='home'),
     path('home', views.home, name='home'),
     path('live', views.live, name='live'),
