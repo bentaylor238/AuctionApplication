@@ -75,72 +75,61 @@ def randomString(stringLength=10):
                     
 def silent(request):
 
-    SilentItem.objects.all().delete()
-    Bid.objects.all().delete()
-
-    createMockItems()
+    # SilentItem.objects.all().delete()
+    # Bid.objects.all().delete()
+    #
+    # createMockItems()
 
     context = {
-        'bidform': BidForm(),
-        'itembid': getItemBid()
+        'itembid': getBidItemForm()
     }
     return render(request, 'silent.html', context)
 
 
-def getItemBid():
+def getBidItemForm():
     mylist = []
-    # bidlist needs to be a list of bids, one for each item, where the returned bid is is the highest amount for that item
-    bidlist = getHighestBid()
+    bidlist = []
+    for item in SilentItem.objects.all():
+        bidlist.append(getBiggestBidForItem(item))
     itemlist = list(SilentItem.objects.all())
+    formlist = []
+    for form in SilentItem.objects.all():
+        formlist.append(BidForm(initial={'amount': getBiggestBidForItem(form).amount}))
     for i in range(len(SilentItem.objects.all())):
-        mylist.append((bidlist[i], itemlist[i]))
+        mylist.append((bidlist[i], itemlist[i], formlist[i]))
     return mylist
 
 
-def getHighestBid(): # returns list of one bid per item, where the bid is the highest amount
-    list = []
-    for item in SilentItem.objects.all():
-        bids = Bid.objects.filter(item=item)
-        tracker = 0.0
-        highestbid = Bid()
-        for bid in bids:
-            print('$', bid.amount)
-            if bid.amount > tracker:
-                highestbid = bid
-                tracker = highestbid.amount
-        list.append(highestbid)
-    return list
+def getBiggestBidForItem(item):
+    bids = Bid.objects.filter(item=item)
+    bigbid = Bid()
+    tracker = 0.0
+    for bid in bids:
+        if bid.amount >= tracker:
+            bigbid = bid
+            tracker = bigbid.amount
+    return bigbid
 
 
 def submit_bid(request):
     context = {}
     if request.method == 'POST':
         # for key in request.POST:
-        #     print('##### ', key, request.POST[key])
+        #     print('#####', key, request.POST[key])
         amount = request.POST['amount']
         id = request.POST['item_id']
         # create new form
         bidform = BidForm(request.POST)
         if bidform.is_valid():
-            # create a bid object
-            # print('USER === ', request.user.username)
-            # bid = Bid.objects.get(item=SilentItem.objects.get(id=id))
-            new_bid = Bid(item=SilentItem.objects.get(id=id), amount=amount, user=AuctionUser.objects.get(username=request.user.username)) # TODO: get user somehow here
-            new_bid.save()
-            # bid.amount = amount
-            # # bid.user = User.objects.get()
-            # bid.user = User.objects.get(name='user2')
-            # bid.save()
-            context = {
-                'bidform': BidForm(),
-                'itembid': getItemBid()
-            }
+            if float(amount) > getBiggestBidForItem(SilentItem.objects.get(id=id)).amount:
+                new_bid = Bid(item=SilentItem.objects.get(id=id), amount=amount, user=AuctionUser.objects.get(username=request.user.username))
+                new_bid.save()
         else:
             # this means invalid data was posted
-            context = {
-                'bidform': bidform,
-                'itembid': getItemBid()
-            }
+            print("invalid data")
+        context = {
+            'itembid': getBidItemForm()
+        }
     return render(request, 'silent.html', context)
 
 def users(request):

@@ -3,17 +3,17 @@
     silent auction page
     <br>
     {% if itembid %}
-        {% for item in itembid %}
+        {% for bid, item, form in itembid %}
             <div style="width: 350px; height: 210px; border: solid 1px #ccc; display: inline-block;">
-            <h2>Title: {{ item.1.title }}</h2>
-            <p>Description: {{ item.1.description }}</p>
-            <p>Image Name: {{ item.1.imageName }}</p>
-            <p>Current Bid: {{ item.0.amount }}</p>
+            <h2>Title: {{ item.title }}</h2>
+            <p>Description: {{ item.description }}</p>
+            <p>Image Name: {{ item.imageName }}</p>
+            <p>Current Bid: {{ bid.amount }}</p>
 
             <form action="{% url 'submit_bid' %}" method="post">
                 {% csrf_token %}
-                {{ bidform.as_p }}
-                <input type="hidden" name="item_id" value="{{ item.1.id }}" />
+                {{ form.as_p }}
+                <input type="hidden" name="item_id" value="{{ item.id }}" />
                 <button type="submit">Bid</button>
             </form>
             </div>
