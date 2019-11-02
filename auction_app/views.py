@@ -111,13 +111,11 @@ def getBiggestBidForItem(item):
 
 
 def submit_bid(request):
-    context = {}
     if request.method == 'POST':
         # for key in request.POST:
         #     print('#####', key, request.POST[key])
         amount = request.POST['amount']
         id = request.POST['item_id']
-        # create new form
         bidform = BidForm(request.POST)
         if bidform.is_valid():
             if float(amount) > getBiggestBidForItem(SilentItem.objects.get(id=id)).amount:
@@ -127,13 +125,11 @@ def submit_bid(request):
             # this means invalid data was posted
             print("invalid data")
 
-        context = getContextSilent(request)
-
-    return render(request, 'silent.html', context)
+    return HttpResponseRedirect("/silent")
 
 
 def getContextSilent(request):
-    print('#####', request.user.username)
+    # print('#####', request.user.username)
     context = {
         'objects': getCategories(request),
     }
@@ -146,7 +142,7 @@ def getCategories(request):
     bidon = []
     unbid = []
     for bid, item, form in biditemform:
-        if str(bid.user) == str(request.user.username):
+        if str(bid.user) == str(request.user.username) and bid.amount != 0.0:
             winning.append((bid, item, form))
         elif userHasBidOn(item, request):
             bidon.append((bid, item, form))
