@@ -6,7 +6,7 @@ import datetime
 
 class Auction(models.Model):
     published = models.BooleanField(default=False)
-    type = models.CharField( max_length=50)
+    type = models.CharField(max_length=50)
 
 class Item(models.Model):
     class Meta:
@@ -46,4 +46,3 @@ class Bid(models.Model):
 
 # class LiveAuction(models.Model):
 #     published = models.BooleanField(default=False)
-
