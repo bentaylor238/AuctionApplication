@@ -39,7 +39,7 @@ def init_test_db(request):
             last_name="johnson",
             auction_number=10,
         ).save()
-        Rule(title="Rule & Announcements",
+        Rule(title="Rules & Announcements",
                 last_modified=timezone.now(),
                 rules_content="Insert rules here",
                 announcements_content="Insert announcements here"
@@ -168,7 +168,7 @@ def submit_bid(request):
 @login_required
 def users(request):
     users = AuctionUser.objects.all()
-    userForm = CreateAccount()
+    userForm = CreateAccountForm()
     context={"users": users,
              "form": userForm}#data to send to the html page goes here
     return render(request, 'users.html', context)
@@ -193,52 +193,23 @@ def updateAuctionNumber(request):
     user.save()
     return redirect(users)
 
-class CreateAccount(generic.CreateView):
-    form_class = CreateAccountForm
-    success_url = reverse_lazy('afterLogin')
-    template_name = 'createAccount.html'
-
-
-#LEFT HERE FOR EXAMPLES, AREN'T BEING USED
-# def login(request, login_form=Login(), create_account_form=CreateAccount()):
-#     if request.method == 'POST':
-#         for key in request.GET:
-#             print(f"\t{key} => {request.GET[key]}")
-#         login_form = Login(request.POST)
-#         if login_form.is_valid():
-#             return redirect(rules)
-#         else:
-#             context={
-#                 #data to send to the html page goes here
-#                 'login_form': login_form, #defaults to a blank Login() object
-#                 'create_account_form': create_account_form, #defaults to a blank CreateAccount() object
-#                 'loginPage': True
-#             }
-#             return render(request, 'login.html', context)
-#     username = None
-#     password = None
-#     return render(request, 'login.html', context)
-
-
-# def create_account(request):
-
-#     if request.method == 'POST':
-#         for key in request.POST:
-#             print(f"\t{key} => {request.POST[key]}")
-#         create_account_form = CreateAccount(request.POST)
-#         if create_account_form.is_valid():
-#             #create user model and save
-#             username = request.POST['new_username']
-#             email = request.POST['email']
-#             password = request.POST['new_password']
-#             firstname = request.POST['first_name']
-#             lastname = request.POST['last_name']
-#             new_user = User(name=firstname+" "+lastname, username=username, email=email, password=password)
-#             new_user.save()
-#             print("user created: " + username)
-#             return redirect(rules)
-#         else:
-#             #call the login view passing in the form to render
-#             return login(request, create_account_form=create_account_form)
-
-     
+#great example of form handling
+def create_account(request):
+    if request.method == 'POST':
+        #create a form object from post data
+        form = CreateAccountForm(request.POST)
+        if form.is_valid():
+            #save data and login the resulting user
+            user = form.save()
+            login(request, user)
+            #redirect to rules view
+            return redirect(rules)
+        else:
+            #form data will be sent back to page because it was invalid
+            context = {"form":form}
+    else:
+        #generates a blank form 
+        form = CreateAccountForm()
+        context = {"form":form}
+    #send back to create account template with the form to render
+    return render(request, "CreateAccount.html", {"form":form})
