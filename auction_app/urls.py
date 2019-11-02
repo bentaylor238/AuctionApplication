@@ -3,11 +3,8 @@ from django.contrib import admin
 from . import views
 
 urlpatterns = [
-<<<<<<< HEAD
     path('init_test_db', views.init_test_db, name="init_test_db"),
-=======
     path('submit_bid', views.submit_bid, name='submit_bid'),
->>>>>>> 44606aba3957b193abe946d99db777adb0fe5db7
     path('index', views.home, name='home'),
     path('home', views.home, name='home'),
     path('live', views.live, name='live'),

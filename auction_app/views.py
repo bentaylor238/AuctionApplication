@@ -46,19 +46,22 @@ def payment(request):
     return render(request, 'payment.html', context)
 
 def rules(request):
+    #get a rules object from db or create a blank one
+    try:
+        rules = Rules.objects.get(pk=1)
+    except:
+        rules = Rules()
+
     if request.method == "POST":
-        form = RulesForm(request.POST, instance=rules) # this way, we save a rules object to the db via a RulesForm
+        form = RulesForm(request.POST, instance=rules) #update the existing rules with post data when saved instead of creating a new one
         form.save()
         return redirect(home)
     else:
-        try:
-            pass
-        except:
-            pass
-    form = RulesForm(instance=rules)
-    context = {
-        "rules": rules,
-        "form":form}
+        form = RulesForm(instance=rules) #populate form with db or blank data
+        context = {
+            "rules": rules,
+            "form":form
+        }
     return render(request, 'rules.html', context)
 
 def getDefaultRules():
