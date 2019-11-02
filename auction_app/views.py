@@ -11,7 +11,7 @@ from django.shortcuts import redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.urls import reverse_lazy
 from django.views import generic
-#from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 #from django.contrib.auth import authenticate
 
 
@@ -25,7 +25,8 @@ def live(request):
     return render(request, 'live.html', context)
 
 def payment(request):
-    context={}#data to send to the html page goes here
+    users = AuctionUser.objects.all()
+    context={"users": users}#data to send to the html page goes here
     return render(request, 'payment.html', context)
 
 def rules(request):
@@ -139,7 +140,10 @@ def submit_bid(request):
     return render(request, 'silent.html', context)
 
 def users(request):
-    context = {} # data to send to the html page goes here
+    users = AuctionUser.objects.all()
+    userForm = CreateAccount()
+    context={"users": users,
+             "form": userForm}#data to send to the html page goes here
     return render(request, 'users.html', context)
 
 
@@ -148,6 +152,17 @@ def afterLogin(request):
         return redirect(home)
     else:
         return redirect(rules)
+
+
+def updateAuctionNumber(request):
+    #do update
+    for key in request.POST:
+        print(f"\t{key} => {request.POST[key]}")
+    username = request.POST['username']
+    user = AuctionUser.objects.get(username=username)
+    user.auction_number = request.POST['auction_number']
+    user.save()
+    return redirect(users)
 
 #LEFT HERE FOR EXAMPLES, AREN'T BEING USED
 # def login(request, login_form=Login(), create_account_form=CreateAccount()):
