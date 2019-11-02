@@ -3,7 +3,7 @@ import random
 import string
 
 from django.shortcuts import render
-from auction_app.models import Rules, AuctionUser, SilentItem, Bid, Item, Auction
+from auction_app.models import Rule, AuctionUser, SilentItem, Bid, Item, Auction
 from django.utils import timezone
 from .forms import *
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect, HttpResponseNotFound
@@ -12,12 +12,15 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.urls import reverse_lazy
 from django.views import generic
-from .settings import *
+from django.contrib.auth.decorators import login_required
+from .debug_settings import *
 
+@login_required
 def home(request):
     context={}#data to send to the html page goes here
     return render(request, 'home.html', context)
 
+@login_required
 def init_test_db(request):
     if DEBUG:
         AuctionUser(
@@ -28,32 +31,48 @@ def init_test_db(request):
             last_name="thompson",
             auction_number=20,
         ).save()
-        Rules(title="Rules & Announcements",
+        AuctionUser(
+            username="user2",
+            password="passpass",
+            email="email@email.com",
+            first_name="johnny",
+            last_name="johnson",
+            auction_number=10,
+        ).save()
+        Rule(title="Rule & Announcements",
                 last_modified=timezone.now(),
                 rules_content="Insert rules here",
-                announcements_content="Insert announcements here")
+                announcements_content="Insert announcements here"
+        ).save()
         return HttpResponse("Success")
     else:
         return HttpResponseNotFound()
 
+@login_required
 def live(request):
     context={}#data to send to the html page goes here
     return render(request, 'live.html', context)
 
+@login_required
 def payment(request):
     users = AuctionUser.objects.all()
     context={"users": users}#data to send to the html page goes here
     return render(request, 'payment.html', context)
 
+@login_required
 def rules(request):
     #get a rules object from db or create a blank one
-    try:
-        rules = Rules.objects.get(pk=1)
-    except:
-        rules = Rules()
+    rules = Rule.objects.all().first()
+    empty = False
+    if not rules:
+        empty = True
+        rules = Rule()
 
     if request.method == "POST":
-        form = RulesForm(request.POST, instance=rules) #update the existing rules with post data when saved instead of creating a new one
+        if empty:
+            form = RulesForm(request.POST) #creates new rules object when saved
+        else: 
+            form = RulesForm(request.POST, instance=rules) #update the existing rules with post data
         form.save()
         return redirect(home)
     else:
@@ -64,18 +83,7 @@ def rules(request):
         }
     return render(request, 'rules.html', context)
 
-def getDefaultRules():
-    f = open('auction_app/static/txt/defaultRules.txt', 'r')
-    defaultRules = f.read()
-    f.close()
-    f = open('auction_app/static/txt/defaultAnnouncements.txt', 'r')
-    defaultAnnouncements = f.read()
-    f.close()
-    return Rules(title="Rules & Announcements",
-                last_modified=timezone.now(),
-                rules_content=defaultRules,
-                announcements_content=defaultAnnouncements)
-
+@login_required
 def createMockItems():
     for i in range(10):
         auction = Auction.objects.all()[0]
@@ -86,10 +94,12 @@ def createMockItems():
         bid = Bid(amount=0, user=user, item=item)
         bid.save()
 
+@login_required
 def randomString(stringLength=10):
     letters = string.ascii_lowercase
     return ''.join(random.choice(letters) for i in range(stringLength))
-                    
+       
+@login_required                    
 def silent(request):
 
     createMockItems()
@@ -100,7 +110,7 @@ def silent(request):
     }
     return render(request, 'silent.html', context)
 
-
+@login_required
 def getItemBid():
     mylist = []
     # bidlist needs to be a list of bids, one for each item, where the returned bid is is the highest amount for that item
@@ -110,7 +120,7 @@ def getItemBid():
         mylist.append((bidlist[i], itemlist[i]))
     return mylist
 
-
+@login_required
 def getHighestBid(): # returns list of one bid per item, where the bid is the highest amount
     list = []
     tracker = 0.0
@@ -124,7 +134,7 @@ def getHighestBid(): # returns list of one bid per item, where the bid is the hi
         tracker = 0.0
     return list
 
-
+@login_required
 def submit_bid(request):
     context = {}
     if request.method == 'POST':
@@ -156,6 +166,7 @@ def submit_bid(request):
             }
     return render(request, 'silent.html', context)
 
+@login_required
 def users(request):
     users = AuctionUser.objects.all()
     userForm = CreateAccount()
@@ -163,14 +174,16 @@ def users(request):
              "form": userForm}#data to send to the html page goes here
     return render(request, 'users.html', context)
 
-
+@login_required
 def afterLogin(request):
+    #login the user
+    login(request, request.user)
     if request.user.is_superuser:
         return redirect(home)
     else:
         return redirect(rules)
 
-
+@login_required
 def updateAuctionNumber(request):
     #do update
     for key in request.POST:

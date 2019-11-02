@@ -1,10 +1,10 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from .models import Rules, AuctionUser
+from .models import Rule, AuctionUser
 
 class RulesForm(forms.ModelForm):
     class Meta:
-        model = Rules
+        model = Rule
         fields = ('title', 'rules_content', 'announcements_content')
 
 class BidForm(forms.Form):
