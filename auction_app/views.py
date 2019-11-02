@@ -75,6 +75,9 @@ def randomString(stringLength=10):
                     
 def silent(request):
 
+    SilentItem.objects.all().delete()
+    Bid.objects.all().delete()
+
     createMockItems()
 
     context = {
@@ -96,30 +99,31 @@ def getItemBid():
 
 def getHighestBid(): # returns list of one bid per item, where the bid is the highest amount
     list = []
-    tracker = 0.0
-    highestbid = Bid()
     for item in SilentItem.objects.all():
         bids = Bid.objects.filter(item=item)
+        tracker = 0.0
+        highestbid = Bid()
         for bid in bids:
+            print('$', bid.amount)
             if bid.amount > tracker:
                 highestbid = bid
+                tracker = highestbid.amount
         list.append(highestbid)
-        tracker = 0.0
     return list
 
 
 def submit_bid(request):
     context = {}
     if request.method == 'POST':
-        for key in request.POST:
-            print('##### ', key, request.POST[key])
+        # for key in request.POST:
+        #     print('##### ', key, request.POST[key])
         amount = request.POST['amount']
         id = request.POST['item_id']
         # create new form
         bidform = BidForm(request.POST)
         if bidform.is_valid():
             # create a bid object
-            print('USER === ', request.user.username)
+            # print('USER === ', request.user.username)
             # bid = Bid.objects.get(item=SilentItem.objects.get(id=id))
             new_bid = Bid(item=SilentItem.objects.get(id=id), amount=amount, user=AuctionUser.objects.get(username=request.user.username)) # TODO: get user somehow here
             new_bid.save()
