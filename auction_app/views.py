@@ -1,7 +1,9 @@
 import datetime
+import random
+import string
 
 from django.shortcuts import render
-from auction_app.models import Rules, AuctionUser, SilentItem, Bid, Item
+from auction_app.models import Rules, AuctionUser, SilentItem, Bid, Item, Auction
 from django.utils import timezone
 from .forms import *
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
@@ -55,8 +57,24 @@ def getDefaultRules():
                 last_modified=timezone.now(),
                 rules_content=defaultRules,
                 announcements_content=defaultAnnouncements)
+
+def createMockItems():
+    for i in range(10):
+        auction = Auction.objects.all()[0]
+        item = SilentItem(title=randomString(), description=randomString(), imageName=randomString(), auction=auction)
+        user = AuctionUser.objects.all()[0]
+        item.save()
+        user.save()
+        bid = Bid(amount=0, user=user, item=item)
+        bid.save()
+
+def randomString(stringLength=10):
+    letters = string.ascii_lowercase
+    return ''.join(random.choice(letters) for i in range(stringLength))
                     
 def silent(request):
+
+    createMockItems()
 
     context = {
         'bidform': BidForm(),
@@ -76,17 +94,17 @@ def getItemBid():
 
 
 def getHighestBid(): # returns list of one bid per item, where the bid is the highest amount
-    items = SilentItem.objects.all()
     list = []
     tracker = 0.0
     highestbid = Bid()
-    for item in items:
+    for item in SilentItem.objects.all():
         bids = Bid.objects.filter(item=item)
         for bid in bids:
             if bid.amount > tracker:
                 highestbid = bid
         list.append(highestbid)
         tracker = 0.0
+    return list
 
 
 def submit_bid(request):
@@ -102,7 +120,7 @@ def submit_bid(request):
             # create a bid object
             print('USER === ', request.user.username)
             # bid = Bid.objects.get(item=SilentItem.objects.get(id=id))
-            new_bid = Bid(item=SilentItem.objects.get(id=id), amount=amount, user=User.objects.get(name=request.user.username)) # TODO: get user somehow here
+            new_bid = Bid(item=SilentItem.objects.get(id=id), amount=amount, user=AuctionUser.objects.get(username=request.user.username)) # TODO: get user somehow here
             new_bid.save()
             # bid.amount = amount
             # # bid.user = User.objects.get()

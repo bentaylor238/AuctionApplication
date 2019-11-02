@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import SilentItem, Bid, User
+from .models import SilentItem, Bid, AuctionUser, Auction
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
@@ -19,3 +19,4 @@ admin.site.register(Rules)
 admin.site.register(SilentItem)
 admin.site.register(Bid)
 admin.site.register(User)
+admin.site.register(Auction)
