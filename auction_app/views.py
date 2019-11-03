@@ -21,7 +21,7 @@ def home(request):
     return render(request, 'home.html', context)
 
 def live(request):
-    context={}#data to send to the html page goes here
+    context={} # data to send to the html page goes here
     return render(request, 'live.html', context)
 
 def payment(request):
