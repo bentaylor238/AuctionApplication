@@ -15,6 +15,7 @@ urlpatterns = [
     path('afterLogin',views.afterLogin, name='afterLogin'),
     path('rules', views.rules, name='rules'),
     path('create_account', views.create_account, name='create_account'),
-    path('', include('django.contrib.auth.urls')), #auth.urls includes the login url
-    path('',views.home, name='home'), #if not login, head to home
+    path('', include('django.contrib.auth.urls')), # auth.urls includes the login url
+    path('', views.home, name='home'),
+    path('updateAuctionNumber', views.updateAuctionNumber, name='updateAuctionNumber')
 ]
