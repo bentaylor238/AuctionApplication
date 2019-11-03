@@ -1,11 +1,25 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from .models import Rules, AuctionUser
+from .models import Rule, AuctionUser
 
 class RulesForm(forms.ModelForm):
     class Meta:
-        model = Rules
+        model = Rule
         fields = ('title', 'rules_content', 'announcements_content')
+
+class BidForm(forms.Form):
+    amount = forms.FloatField(label='Amount in $:')
+
+class CreateAccountForm(UserCreationForm):
+    class Meta:
+        model = AuctionUser
+        fields = ('first_name','last_name', 'username','email',)
+
+class UpdateAccountForm(UserChangeForm):
+    class Meta:
+        model = AuctionUser
+        fields = ('first_name','last_name', 'username','email','auction_number')
+
 
 #SAVED FOR AN EXAMPLE, NOT USED
 # class CreateAccount(forms.Form):
@@ -24,17 +38,3 @@ class RulesForm(forms.ModelForm):
 #             if password != confirm_password:
 #                 raise forms.ValidationError('Passwords do not match')
 #             return password
-
-
-class BidForm(forms.Form):
-    amount = forms.FloatField(label='Amount in $:')
-
-class CreateAccount(UserCreationForm):
-    class Meta:
-        model = AuctionUser
-        fields = ('first_name','last_name', 'username','email',)
-
-class UpdateAccount(UserChangeForm):
-    class Meta:
-        model = AuctionUser
-        fields = ('first_name','last_name', 'username','email','auction_number')

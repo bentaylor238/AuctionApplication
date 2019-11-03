@@ -12,7 +12,6 @@ class Item(models.Model):
     class Meta:
         abstract = True
     title = models.CharField(max_length=200, default='')
-    # user = models.ForeignKey(User, on_delete=models.CASCADE)
     description = models.CharField(max_length=200, default='')
     date = models.DateTimeField(datetime.datetime.now(), default=datetime.datetime.now())
     imageName = models.CharField(max_length=50, default='')
@@ -25,7 +24,7 @@ class SilentItem(Item):
 class LiveItem(Item):
     orderInQueue = models.IntegerField()
 
-class Rules(models.Model):
+class Rule(models.Model):
     title = models.CharField(max_length=200)
     last_modified = models.DateTimeField(default=None, blank=True, null=True)
     rules_content = models.TextField(default=None, blank=True, null=True)
