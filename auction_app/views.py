@@ -75,6 +75,8 @@ def randomString(stringLength=10):
                     
 def silent(request):
 
+    # initialize a few items
+
     # SilentItem.objects.all().delete()
     # Bid.objects.all().delete()
     #
