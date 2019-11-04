@@ -3,9 +3,9 @@ import random
 import string
 
 from django.shortcuts import render
-from auction_app.models import Rule, AuctionUser, SilentItem, Bid, Item, Auction
-from django.utils import timezone
+from .models import *
 from .forms import *
+from django.utils import timezone
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect, HttpResponseNotFound
 from django.shortcuts import redirect
 from django.contrib.auth.forms import UserCreationForm
@@ -15,17 +15,38 @@ from django.views import generic
 from django.contrib.auth.decorators import login_required
 from .debug_settings import *
 
+
 @login_required
 def home(request):
-    context={}#data to send to the html page goes here
+    if request.method == "POST":
+        for key in request.POST:
+            print(f"\t{key} => {request.POST[key]}")
+        request.POST = request.POST.copy() #create a mutable post
+        request.POST['published'] = not getBool(request.POST['published'])
+        auctionType = request.POST['type']
+        auction = Auction.objects.filter(type=auctionType).first()
+        form = AuctionForm(request.POST, instance=auction)
+        form.save()
+    silentAuction = Auction.objects.filter(type='silent').first()
+    silentForm = AuctionForm(instance=silentAuction)
+    liveAuction = Auction.objects.filter(type='live').first()
+    liveForm = AuctionForm(instance=liveAuction)
+    auctionForms = [silentForm, liveForm]
+    context={"forms":auctionForms} #data to send to the html page goes here
     return render(request, 'home.html', context)
+
+def getBool(str):
+    if str.lower() == 'true':
+        return True
+    else:
+        return False
 
 @login_required
 def init_test_db(request):
     if DEBUG:
         AuctionUser(
             username="user1",
-            password="passpass",
+            password="pass1212",
             email="email@email.com",
             first_name="tommy",
             last_name="thompson",
@@ -33,7 +54,7 @@ def init_test_db(request):
         ).save()
         AuctionUser(
             username="user2",
-            password="passpass",
+            password="pass1212",
             email="email@email.com",
             first_name="johnny",
             last_name="johnson",
@@ -65,6 +86,10 @@ def init_test_db(request):
 
 @login_required
 def live(request):
+    liveAuction = Auction.objects.filter(type='live').first()
+    if not liveAuction.published and not request.user.is_superuser:
+        return redirect(home)
+
     context={}#data to send to the html page goes here
     return render(request, 'live.html', context)
 
@@ -104,12 +129,17 @@ def randomString(stringLength=10):
        
 @login_required                    
 def silent(request):
+    silentAuction = Auction.objects.filter(type='silent').first()
+    if not silentAuction.published and not request.user.is_superuser:
+        return redirect(home)
+
     # SilentItem.objects.all().delete()
     # Bid.objects.all().delete()
     #
     # createMockItems()
 
     context = getContextSilent(request)
+
 
     return render(request, 'silent.html', context)
 

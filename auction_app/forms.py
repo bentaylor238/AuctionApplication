@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from .models import Rule, AuctionUser
+from .models import Rule, AuctionUser, Auction
 
 class RulesForm(forms.ModelForm):
     class Meta:
@@ -20,6 +20,10 @@ class UpdateAccountForm(UserChangeForm):
         model = AuctionUser
         fields = ('first_name','last_name', 'username','email','auction_number')
 
+class AuctionForm(forms.ModelForm):
+    class Meta:
+        model = Auction
+        fields = ('published', 'type')
 
 #SAVED FOR AN EXAMPLE, NOT USED
 # class CreateAccount(forms.Form):
