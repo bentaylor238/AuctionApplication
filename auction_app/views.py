@@ -129,10 +129,11 @@ def randomString(stringLength=10):
        
 @login_required                    
 def silent(request):
+
     silentAuction = Auction.objects.filter(type='silent').first()
     if not silentAuction.published and not request.user.is_superuser:
         return redirect(home)
-
+      
     # SilentItem.objects.all().delete()
     # Bid.objects.all().delete()
     #
