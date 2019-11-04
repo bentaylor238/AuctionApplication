@@ -17,6 +17,15 @@ from .debug_settings import *
 
 
 @login_required
+def receive(request):
+    print(request.POST['user_message'])
+    return redirect('testing')
+
+
+
+def testing(request):
+    return render(request, 'live.html', {})
+
 def home(request):
     if request.method == "POST":
         for key in request.POST:
@@ -80,17 +89,35 @@ def init_test_db(request):
             user = AuctionUser.objects.all().first()
             user.save()
             bid = Bid(amount=0, user=user, item=item).save()
+
+            # populated the live database too
+            itemLive = LiveItem(
+                title=randomString(),
+                description=randomString(),
+                imageName=randomString(),
+                auction=silentAuction,
+                orderInQueue=i
+            )
+            itemLive.save()
         return redirect(login)
     else:
         return HttpResponseNotFound()
 
 @login_required
 def live(request):
-    liveAuction = Auction.objects.filter(type='live').first()
-    if not liveAuction.published and not request.user.is_superuser:
-        return redirect(home)
+    # handle later
+    # liveAuction = Auction.objects.filter(type='live').first()
+    # if not liveAuction.published and not request.user.is_superuser:
+    #     return redirect(home)
+    try:
+        currentItem = LiveItem.objects.get(orderInQueue=1)
+    except Exception as e:
+        return HttpResponse("Error (there are probably more than one items in the database with an orderInQueue equal to 1. Here's the full error from django: " + str(e))
 
-    context={}#data to send to the html page goes here
+    context = {
+        'currentItem': currentItem,
+        'items': LiveItem.objects.all().exclude(orderInQueue=1)
+    }
     return render(request, 'live.html', context)
 
 @login_required

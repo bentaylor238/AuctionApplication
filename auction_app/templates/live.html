@@ -1,4 +1,34 @@
 {% extends 'base.html' %}
 {% block content %}
-    live auction page
+
+<h3>Current Item: {{currentItem.title}}</h3>
+Description of current Item:{{ currentItem.description}}
+
+<br><br><br>
+<h4>Items on Deck:</h4>
+
+{% for item in items %}
+<h5>{{ item.title }}</h5>
+{{ item.description }}
+{% endfor %}
+
+	<form action="receive" method='POST'>
+        {% csrf_token %}
+        <div>
+		    <label for="name">Name:</label>
+		    <input type="text" id="name" name="user_name">
+        </div>
+        <div>
+	        <label for="mail">E-mail:</label>
+	        <input type="email" id="mail" name="user_mail">
+        </div>
+        <div>
+	        <label for="msg">Message:</label>
+    	    <textarea id="msg" name="user_message"></textarea>
+        </div>
+        <div class="button">
+	        <button type="submit">This is the inner submit HTML button text</button>
+        </div>
+	</form>
+
 {% endblock %}
