@@ -4,6 +4,18 @@
 <h3>Current Item: {{currentItem.title}}</h3>
 Description of current Item:{{ currentItem.description}}
 
+<form action='sellLiveItem', method="POST">
+    {% csrf_token %}
+    <input type="text" name="number" id="winning_user">
+    <label for="winning_user">Auction Number of Winner:</label>
+    <br>
+    <input type="text" name="amount" id="winning_amount">
+    <label for="winning_amount">Winning Amount:</label>
+    <br>
+    <intput type="text" name={{currentItem.title}}
+    <button type="submit">Submit Winning Bid</button>
+</form>
+
 <br><br><br>
 <h4>Items on Deck:</h4>
 
