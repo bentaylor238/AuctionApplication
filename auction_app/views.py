@@ -222,15 +222,24 @@ def users(request):
     users = AuctionUser.objects.all()
     form = CreateAccountForm()
     if request.method == 'POST':
-        form = CreateAccountForm(request.POST)
-        #This part is what's broken, fix this to get password auto put into form
-        # form.cleaned_data['password1'] = "ax7!bwaBc"
-        # form.cleaned_data['password2'] = "ax7!bwaBc"
-        if form.is_valid(): #passing passwords hiddenly so this should work
-            #save data
+        form_data = request.POST.copy()
+        form_data.update(password1="ax7!bwaZc")
+        form_data.update(password2="ax7!bwaZc")
+        form = CreateAccountForm(form_data)
+        # print(form.is_valid())
+        if form.is_valid():
             print("test\n")
+            #save data
             form.save()
+            users = AuctionUser.objects.all()
+            form = CreateAccountForm()
+            context = {
+                "users": users,
+                "form": form}
+            return render(request, 'users.html', context)
         else:
+            print(form.cleaned_data)
+            print(form.errors) #NEED TO PRINT SOME ERRORS TO THE USER SOMEHOW
             context = {
                 "users": users,
                 "form":form}
@@ -268,6 +277,7 @@ def create_account(request):
         form = CreateAccountForm(request.POST)
         if form.is_valid():
             #save data and login the resulting user
+            print(form.cleaned_data)
             user = form.save()
             login(request, user)
             #redirect to rules view
