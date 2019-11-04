@@ -166,10 +166,11 @@ def randomString(stringLength=10):
        
 @login_required                    
 def silent(request):
+
     silentAuction = Auction.objects.filter(type='silent').first()
     if not silentAuction.published and not request.user.is_superuser:
         return redirect(home)
-
+      
     # SilentItem.objects.all().delete()
     # Bid.objects.all().delete()
     #
@@ -257,10 +258,35 @@ def userHasBidOn(item, request):
 @login_required
 def users(request):
     users = AuctionUser.objects.all()
-    userForm = CreateAccountForm()
-    context={"users": users,
-             "form": userForm}#data to send to the html page goes here
-    return render(request, 'users.html', context)
+    form = CreateAccountForm()
+    if request.method == 'POST':
+        form_data = request.POST.copy()
+        form_data.update(password1="ax7!bwaZc")
+        form_data.update(password2="ax7!bwaZc")
+        form = CreateAccountForm(form_data)
+        # print(form.is_valid())
+        if form.is_valid():
+            print("test\n")
+            #save data
+            form.save()
+            users = AuctionUser.objects.all()
+            form = CreateAccountForm()
+            context = {
+                "users": users,
+                "form": form}
+            return render(request, 'users.html', context)
+        else:
+            print(form.cleaned_data)
+            print(form.errors) #NEED TO PRINT SOME ERRORS TO THE USER SOMEHOW
+            context = {
+                "users": users,
+                "form":form}
+            return render(request, 'users.html', context)
+    else:
+        #first visit
+        context={"users": users,
+                 "form": form}#data to send to the html page goes here
+        return render(request, 'users.html', context)
 
 @login_required
 def afterLogin(request):
@@ -289,6 +315,7 @@ def create_account(request):
         form = CreateAccountForm(request.POST)
         if form.is_valid():
             #save data and login the resulting user
+            print(form.cleaned_data)
             user = form.save()
             login(request, user)
             #redirect to rules view
