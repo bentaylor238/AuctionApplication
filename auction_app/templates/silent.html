@@ -1,24 +1,40 @@
 {% extends 'base.html' %}
 {% block content %}
-    silent auction page
-    <br>
-    {% if itembid %}
-        {% for item in itembid %}
-            <div style="width: 350px; height: 210px; border: solid 1px #ccc; display: inline-block;">
-            <h2>Title: {{ item.1.title }}</h2>
-            <p>Description: {{ item.1.description }}</p>
-            <p>Image Name: {{ item.1.imageName }}</p>
-            <p>Current Bid: {{ item.0.amount }}</p>
-
-            <form action="{% url 'submit_bid' %}" method="post">
-                {% csrf_token %}
-                {{ bidform.as_p }}
-                <input type="hidden" name="item_id" value="{{ item.1.id }}" />
-                <button type="submit">Bid</button>
-            </form>
-            </div>
+    <h1>Silent Auction</h1>
+    {% if objects %}
+        {% for object, title in objects %}
+            <hr>
+            <h2>{{ title }}</h2>
+            {% if object %}
+                {% for bid, item, form in object %}
+                    <div style="width: 350px; height: 210px; border: solid 1px #ccc; display: inline-block;">
+                    <h2>Title: {{ item.title }}</h2>
+                    <p>Description: {{ item.description }}</p>
+                    <p>Image Name: {{ item.imageName }}</p>
+                    <p>Current Bid: {{ bid.amount }}</p>
+                    <form action="{% url 'submit_bid' %}" method="post">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <input type="hidden" name="item_id" value="{{ item.id }}" />
+                        <button type="submit">Bid</button>
+                    </form>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <strong>No items match the criteria</strong>
+            {% endif %}
+            <br>
         {% endfor %}
     {% else %}
         <strong>No items match the criteria</strong>
     {% endif %}
+    <h3>Create New Item</h3>
+    <form action="{% url "create_item" %}" method="post">
+        {% csrf_token %}
+        <table>
+            {{createItem.as_table}}
+        </table>
+        <input type="hidden" name="type" value="silent"></input>
+        <button type="submit">Submit</button>
+    </form>
 {% endblock %}

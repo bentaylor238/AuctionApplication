@@ -5,8 +5,17 @@ from django.contrib.auth.models import AbstractUser
 import datetime
 
 class Auction(models.Model):
+    SILENT = "silent"
+    LIVE = "live"
+    TYPE_CHOICES = [
+        (SILENT, "Silent"),
+        (LIVE, "Live")
+    ]
     published = models.BooleanField(default=False)
-    type = models.CharField(max_length=50)
+    type = models.CharField(max_length=10, choices=TYPE_CHOICES)
+
+    def __str__(self):
+        return self.type
 
 class Item(models.Model):
     class Meta:

@@ -3,6 +3,7 @@ from django.contrib import admin
 from . import views
 
 urlpatterns = [
+    path('create_item', views.create_item, name="create_item"),
     path('updateAuctionNumber', views.updateAuctionNumber, name='updateAuctionNumber'),
     path('init_test_db', views.init_test_db, name="init_test_db"),
     path('submit_bid', views.submit_bid, name='submit_bid'),
@@ -15,6 +16,7 @@ urlpatterns = [
     path('afterLogin',views.afterLogin, name='afterLogin'),
     path('rules', views.rules, name='rules'),
     path('create_account', views.create_account, name='create_account'),
-    path('', include('django.contrib.auth.urls')), #auth.urls includes the login url
-    path('',views.home, name='home'), #if not login, head to home
+    path('', include('django.contrib.auth.urls')), # auth.urls includes the login url
+    path('', views.home, name='home'),
+    path('updateAuctionNumber', views.updateAuctionNumber, name='updateAuctionNumber')
 ]

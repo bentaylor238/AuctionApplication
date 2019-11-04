@@ -6,7 +6,7 @@ from django.shortcuts import render
 from .models import *
 from .forms import *
 from django.utils import timezone
-from django.http import HttpResponse, JsonResponse, HttpResponseRedirect, HttpResponseNotFound
+from django.http import HttpResponse, JsonResponse, HttpResponseRedirect, HttpResponseNotFound, HttpResponseForbidden
 from django.shortcuts import redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
@@ -19,8 +19,8 @@ from .debug_settings import *
 @login_required
 def home(request):
     if request.method == "POST":
-        for key in request.POST:
-            print(f"\t{key} => {request.POST[key]}")
+        # for key in request.POST:
+        #     print(f"\t{key} => {request.POST[key]}")
         request.POST = request.POST.copy() #create a mutable post
         request.POST['published'] = not getBool(request.POST['published'])
         auctionType = request.POST['type']
@@ -86,6 +86,7 @@ def init_test_db(request):
 
 @login_required
 def live(request):
+    #this prevents non admins from getting to this page if its not a published auction
     liveAuction = Auction.objects.filter(type='live').first()
     if not liveAuction.published and not request.user.is_superuser:
         return redirect(home)
@@ -127,71 +128,117 @@ def randomString(stringLength=10):
     letters = string.ascii_lowercase
     return ''.join(random.choice(letters) for i in range(stringLength))
        
+@login_required
+def create_item(request):
+    if request.method == "POST" and request.user.is_superuser:
+        request.POST = request.POST.copy() #make the post mutable
+        #select the correct item type
+        print(request.POST.get("auction", False))
+        id = request.POST.get("auction", False)
+        auction = Auction.objects.get(pk=id)
+        request.POST['auction'] = auction
+        item = SilentItemForm(request.POST)
+            # auction = Auction.objects.filter(type=Auction.SILENT).first()
+            # request.POST['auction'] = auction
+        # elif request.POST.get("auction", False) == Auction.LIVE:
+        #     # auction = Auction.objects.filter(type=Auction.LIVE).first()
+        #     # request.POST['auction'] = auction
+        #     item = LiveItemForm(request.POST)
+
+        if item.is_valid():
+            item.save()
+        else:
+            print("invalid form request")
+            for error in item.errors:
+                print(error.message)
+        if request.POST.get("type", False) == Auction.SILENT:
+            return redirect(silent) 
+        elif request.POST.get("type", False) == Auction.LIVE:
+            return redirect(live)
+    else:
+        return HttpResponseForbidden()
+
 @login_required                    
 def silent(request):
+    #this prevents non admins from getting to this page if its not a published auction
     silentAuction = Auction.objects.filter(type='silent').first()
     if not silentAuction.published and not request.user.is_superuser:
         return redirect(home)
 
+    createItemForm = SilentItemForm(initial={'auction':silentAuction})
+    # createItemForm.fields['start'].widget = forms.DateTimeInput(attrs={'type':'datetime-local'})
+    # createItemForm.fields['end'].widget = forms.DateTimeInput(attrs={'type':'datetime-local'})
+    # createItemForm.fields['auction'].widget = forms.HiddenInput()
     context = {
-        'bidform': BidForm(),
-        'itembid': getItemBid()
+        'objects': getCategories(request),
+        'createItem': createItemForm,
     }
+
     return render(request, 'silent.html', context)
 
-def getItemBid():
+def getBidItemForm():
     mylist = []
-    # bidlist needs to be a list of bids, one for each item, where the returned bid is is the highest amount for that item
-    bidlist = getHighestBid()
+    bidlist = []
+    for item in SilentItem.objects.all():
+        bidlist.append(getBiggestBidForItem(item))
     itemlist = list(SilentItem.objects.all())
+    formlist = []
+    for form in SilentItem.objects.all():
+        formlist.append(BidForm(initial={'amount': getBiggestBidForItem(form).amount}))
     for i in range(len(SilentItem.objects.all())):
-        mylist.append((bidlist[i], itemlist[i]))
+        mylist.append((bidlist[i], itemlist[i], formlist[i]))
     return mylist
 
-def getHighestBid(): # returns list of one bid per item, where the bid is the highest amount
-    list = []
+def getBiggestBidForItem(item):
+    bids = Bid.objects.filter(item=item)
+    bigbid = Bid()
     tracker = 0.0
-    highestbid = Bid()
-    for item in SilentItem.objects.all():
-        bids = Bid.objects.filter(item=item)
-        for bid in bids:
-            if bid.amount > tracker:
-                highestbid = bid
-        list.append(highestbid)
-        tracker = 0.0
-    return list
+    for bid in bids:
+        if bid.amount >= tracker:
+            bigbid = bid
+            tracker = bigbid.amount
+    return bigbid
 
 @login_required
 def submit_bid(request):
-    context = {}
     if request.method == 'POST':
-        for key in request.POST:
-            print('##### ', key, request.POST[key])
+        # for key in request.POST:
+        #     print('#####', key, request.POST[key])
         amount = request.POST['amount']
         id = request.POST['item_id']
-        # create new form
         bidform = BidForm(request.POST)
         if bidform.is_valid():
-            # create a bid object
-            print('USER === ', request.user.username)
-            # bid = Bid.objects.get(item=SilentItem.objects.get(id=id))
-            new_bid = Bid(item=SilentItem.objects.get(id=id), amount=amount, user=AuctionUser.objects.get(username=request.user.username)) # TODO: get user somehow here
-            new_bid.save()
-            # bid.amount = amount
-            # # bid.user = User.objects.get()
-            # bid.user = User.objects.get(name='user2')
-            # bid.save()
-            context = {
-                'bidform': BidForm(),
-                'itembid': getItemBid()
-            }
+            if float(amount) > getBiggestBidForItem(SilentItem.objects.get(id=id)).amount:
+                new_bid = Bid(item=SilentItem.objects.get(id=id), amount=amount, user=AuctionUser.objects.get(username=request.user.username))
+                new_bid.save()
         else:
             # this means invalid data was posted
-            context = {
-                'bidform': bidform,
-                'itembid': getItemBid()
-            }
-    return render(request, 'silent.html', context)
+            print("invalid data")
+
+    return HttpResponseRedirect("/silent")
+
+
+def getCategories(request):
+    biditemform = getBidItemForm()
+    winning = []
+    bidon = []
+    unbid = []
+    for bid, item, form in biditemform:
+        if str(bid.user) == str(request.user.username) and bid.amount != 0.0:
+            winning.append((bid, item, form))
+        elif userHasBidOn(item, request):
+            bidon.append((bid, item, form))
+        else:
+            unbid.append((bid, item, form))
+    return (winning, 'Winning'), (bidon, 'Bid On'), (unbid, 'Not Bid On')
+
+
+def userHasBidOn(item, request):
+    bids = Bid.objects.filter(item=item)
+    for bid in bids:
+        if str(bid.user) == str(request.user.username) and bid.amount != 0.0:
+            return True
+    return False
 
 @login_required
 def users(request):
