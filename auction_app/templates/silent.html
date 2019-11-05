@@ -1,16 +1,18 @@
 {% extends 'base.html' %}
 {% block content %}
-    <h1>Silent Auction</h1>
+    <h2>Silent auction page</h2>
+    <br>
+    <center>
     {% if objects %}
         {% for object, title in objects %}
             <hr>
             <h2>{{ title }}</h2>
             {% if object %}
                 {% for bid, item, form in object %}
-                    <div style="width: 350px; height: 210px; border: solid 1px #ccc; display: inline-block;">
+                    <div style="width: 20%; height: 25%; border: solid 10px black; padding: 20px; display: inline-block; border-radius: 20px; -moz-border-radius: 10px; background-color: darkgrey; text-align: left;">
                     <h2>Title: {{ item.title }}</h2>
                     <p>Description: {{ item.description }}</p>
-                    <p>Image Name: {{ item.imageName }}</p>
+                    <p>Image Name: {{ item.imageName }} </p>
                     <p>Current Bid: {{ bid.amount }}</p>
                     <form action="{% url 'submit_bid' %}" method="post">
                         {% csrf_token %}
@@ -19,6 +21,7 @@
                         <button type="submit">Bid</button>
                     </form>
                     </div>
+
                 {% endfor %}
             {% else %}
                 <strong>No items match the criteria</strong>

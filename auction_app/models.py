@@ -31,6 +31,7 @@ class SilentItem(Item):
     end = models.DateTimeField(default=None, blank=True, null=True)
 
 class LiveItem(Item):
+    sold=models.BooleanField(default=False)
     orderInQueue = models.IntegerField()
 
 class Rule(models.Model):
