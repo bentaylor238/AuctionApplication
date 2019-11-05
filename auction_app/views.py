@@ -208,8 +208,9 @@ def submit_bid(request):
         id = request.POST['item_id']
         bidform = BidForm(request.POST)
         if bidform.is_valid():
-            if float(amount) > getBiggestBidForItem(SilentItem.objects.get(id=id)).amount:
-                new_bid = Bid(item=SilentItem.objects.get(id=id), amount=amount, user=AuctionUser.objects.get(username=request.user.username))
+            item = SilentItem.objects.get(id=id)
+            if float(amount) > getBiggestBidForItem(item).amount:
+                new_bid = Bid(item=item, amount=amount, user=AuctionUser.objects.get(username=request.user.username))
                 new_bid.save()
         else:
             # this means invalid data was posted
@@ -244,6 +245,11 @@ def userHasBidOn(item, request):
 def users(request):
     users = AuctionUser.objects.all()
     form = CreateAccountForm()
+    print(form.fields)
+    form.fields['password1'].widget = forms.HiddenInput()
+    form.initial['password1'] = "ax7!bwaZc"
+    form.fields['password2'].widget = forms.HiddenInput()
+    form.initial['password2'] = "ax7!bwaZc"
     if request.method == 'POST':
         form_data = request.POST.copy()
         form_data.update(password1="ax7!bwaZc")
@@ -251,21 +257,21 @@ def users(request):
         form = CreateAccountForm(form_data)
         # print(form.is_valid())
         if form.is_valid():
-            print("test\n")
             #save data
             form.save()
             users = AuctionUser.objects.all()
             form = CreateAccountForm()
             context = {
                 "users": users,
-                "form": form}
+                "form": form
+            }
             return render(request, 'users.html', context)
         else:
-            print(form.cleaned_data)
-            print(form.errors) #NEED TO PRINT SOME ERRORS TO THE USER SOMEHOW
             context = {
                 "users": users,
                 "form":form}
+            # print(form.cleaned_data)
+            # print(form.errors) #NEED TO PRINT SOME ERRORS TO THE USER SOMEHOW
             return render(request, 'users.html', context)
     else:
         #first visit
