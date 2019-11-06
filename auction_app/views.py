@@ -300,11 +300,11 @@ def submit_bid(request):
             currentitem = SilentItem.objects.get(id=id)
             if currentitem.bid_set.count() > 0:
                 if float(amount) > currentitem.bid_set.order_by("amount").last().amount:
-                    new_bid = Bid(item=currentitem, amount=amount, user=AuctionUser.objects.get(username=request.user.username))
+                    new_bid = BidSilent(item=currentitem, amount=amount, user=AuctionUser.objects.get(username=request.user.username))
                     new_bid.save()
             else:
                 # this means there were no bids, create a new one
-                new_bid = Bid(item=currentitem, amount=amount, user=AuctionUser.objects.get(username=request.user.username))
+                new_bid = BidSilent(item=currentitem, amount=amount, user=AuctionUser.objects.get(username=request.user.username))
                 new_bid.save()
         else:
             # this means invalid data was posted
