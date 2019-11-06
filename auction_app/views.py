@@ -34,10 +34,13 @@ def home(request):
     auctionForms = [silentForm, liveForm]
 
     user = request.user
-    userBids = Bid.objects.filter(user__id=user.id)
+    userBids = BidSilent.objects.filter(user__id=user.id)
     for bid in userBids:
         if bid.isWinning:
             user.amount+=bid.amount
+    userBids = BidLive.objects.filter(user__id=user.id)
+    for bid in userBids:
+        user.amount+=bid.amount
 
     context={"forms":auctionForms,
              "user": user} #data to send to the html page goes here
@@ -141,10 +144,13 @@ def payment(request):
     users = AuctionUser.objects.all()
     for user in users:
         user.amount = 0
-    bids = Bid.objects.all()
+    bids = BidSilent.objects.all()
     for bid in bids:
         if bid.isWinning:
             bid.user.amount += bid.amount
+    bids = BidLive.objects.all()
+    for bid in bids:
+        bid.user.amount += bid.amount
     context={"users": users}#data to send to the html page goes here
     return render(request, 'payment.html', context)
 
