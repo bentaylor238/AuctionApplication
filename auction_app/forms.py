@@ -27,10 +27,16 @@ class AuctionForm(forms.ModelForm):
 class SilentItemForm(forms.ModelForm):
     class Meta:
         model = SilentItem
-        fields = ('title','description','imageName','start','end','auction')
+        fields = ('title','description','imageName','end','auction')
         widgets = {
-            'start': forms.DateTimeInput(attrs={'type':'datetime-local'}),
-            'end': forms.DateTimeInput(attrs={'type':'datetime-local'})
+            # 'start': forms.DateTimeInput(
+            #     attrs={'type':'datetime-local'}, 
+            #     format='%Y-%m-%dT%H:%M' #this is to match the html datetime-local format
+            # ), 
+            'end': forms.DateTimeInput(
+                attrs={'type':'datetime-local'}, 
+                format='%Y-%m-%dT%H:%M' #this is to match the html datetime-local format
+            ) 
         }
 
 class LiveItemForm(forms.ModelForm):

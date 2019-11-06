@@ -171,12 +171,16 @@ def randomString(stringLength=10):
 @login_required
 def create_item(request):
     if request.method == "POST" and request.user.is_superuser:
+        for key in request.POST:
+            print(f"\t{key} => {request.POST[key]}")
         request.POST = request.POST.copy() #make the post mutable
-        #select the correct item type
-        print(request.POST.get("auction", False))
-        id = request.POST.get("auction", False)
-        auction = Auction.objects.get(pk=id)
-        request.POST['auction'] = auction
+        # #select the correct item type
+        # print(request.POST.get("auction", False))
+        # id = request.POST.get("auction", False)
+        # auction = Auction.objects.get(pk=id)
+        # print(auction)
+        # request.POST['auction'] = auction
+        request.POST['end'] = datetime.datetime.strptime(request.POST['end'], '%Y-%m-%dT%H:%M')
         item = SilentItemForm(request.POST)
             # auction = Auction.objects.filter(type=Auction.SILENT).first()
             # request.POST['auction'] = auction
@@ -189,11 +193,11 @@ def create_item(request):
             item.save()
         else:
             print("invalid form request")
-            for error in item.errors:
-                print(error.message)
-        if request.POST.get("type", False) == Auction.SILENT:
+            print(item.errors)
+
+        if request.POST.get("type", False) == 'silent':
             return redirect(silent) 
-        elif request.POST.get("type", False) == Auction.LIVE:
+        elif request.POST.get("type", False) == 'live':
             return redirect(live)
     else:
         return HttpResponseForbidden()

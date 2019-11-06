@@ -5,11 +5,9 @@ from django.contrib.auth.models import AbstractUser
 import datetime
 
 class Auction(models.Model):
-    SILENT = "silent"
-    LIVE = "live"
     TYPE_CHOICES = [
-        (SILENT, "Silent"),
-        (LIVE, "Live")
+        ("silent", "Silent"),
+        ("live", "Live")
     ]
     published = models.BooleanField(default=False)
     type = models.CharField(max_length=10, choices=TYPE_CHOICES)
@@ -27,7 +25,6 @@ class Item(models.Model):
     auction = models.ForeignKey(Auction, on_delete=models.CASCADE)
 
 class SilentItem(Item):
-    start = models.DateTimeField(default=None, blank=True, null=True)
     end = models.DateTimeField(default=None, blank=True, null=True)
 
 class LiveItem(Item):
