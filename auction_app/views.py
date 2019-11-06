@@ -104,39 +104,39 @@ def init_test_db(request):
 
 @login_required
 def live(request):
-    # handle later
-    # liveAuction = Auction.objects.filter(type='live').first()
-    # if not liveAuction.published and not request.user.is_superuser:
-    #     return redirect(home)
-
-
-    # add bidder # stuff
     try:
-        currentItem = LiveItem.objects.filter(sold=False).get(orderInQueue=1)
+        Auction.objects.get(type='live')
+    except Exception as e:
+        return HttpResponse("The live auction object does not yet exist. Create a live auction then try again. Django error message is " + str(e))
+
+    try:
+        currentItem = LiveItem.objects.filter(sold='False').order_by('orderInQueue')[0]
+        context = {
+            'currentItem': currentItem,
+            'items': LiveItem.objects.all().filter(sold=False).exclude(pk=currentItem.pk)
+        }
+        return render(request, 'live.html', context)
     except Exception as e:
         return HttpResponse("Error (there are probably more than one items in the database with an orderInQueue equal to 1. Here's the full error from django: " + str(e))
 
-    context = {
-        'currentItem': currentItem,
-        'items': LiveItem.objects.all().filter(sold=False).exclude(orderInQueue=1)
-    }
-    return render(request, 'live.html', context)
-
 def sellLiveItem(request):
+    soldItem = LiveItem.objects.get(pk=request.POST['pk'])
     try:
-        currentItem = LiveItem.objects.get(pk=request.POST['itemID']).sold= True
-        currentItem.sold = True
-        currentItem.save()
+        amount = request.POST['amount']
+        user = AuctionUser.objects.get(auction_number=request.POST['auctionNumber'])
+        bid = BidLive(amount=amount, user=user, item=soldItem)
+        bid.save()
+        soldItem.sold = True
+        soldItem.save()
+        return redirect(live)
     except Exception as e:
-        return HttpResponse('Error: the public key of the item that was bid on does not exit in the database. Django error: ' + str(e))
+        context = {
+            'item': soldItem,
+            'error': e,
+            'auctionNumber': request.POST['auctionNumber']
+        }
+        return render(request, 'liveErrorMessage.html', context)
 
-    winner = request.POST['number']
-    amount = request.POST['amount']
-    for liveItem in LiveItem.objects.all().filter(sold=False): # optimize by maintaining a pointer to the next item, or the index of the next item to be visited, rather than decrementing all items and querying for the fist item
-        liveItem.orderInQueue -= 1
-        liveItem.save()
-
-    return HttpResponse(str(winner) + str(amount))
 
 @login_required
 def payment(request):
