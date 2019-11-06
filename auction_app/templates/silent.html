@@ -58,4 +58,13 @@
     {% else %}
         <strong>No items match the criteria</strong>
     {% endif %}
+    <h3>Create New Item</h3>
+    <form action="{% url "create_item" %}" method="post">
+        {% csrf_token %}
+        <table>
+            {{createItem.as_table}}
+        </table>
+        <input type="hidden" name="type" value="silent"></input>
+        <button type="submit">Submit</button>
+    </form>
 {% endblock %}

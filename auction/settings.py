@@ -123,5 +123,7 @@ STATIC_URL = '/static/'
 
 LOGIN_REDIRECT_URL = 'afterLogin'
 LOGOUT_REDIRECT_URL = 'login'
+
 LOGIN_URL = 'login'
+
 AUTH_USER_MODEL = 'auction_app.AuctionUser'

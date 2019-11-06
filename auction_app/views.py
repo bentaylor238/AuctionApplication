@@ -6,7 +6,7 @@ from django.shortcuts import render
 from .models import *
 from .forms import *
 from django.utils import timezone
-from django.http import HttpResponse, JsonResponse, HttpResponseRedirect, HttpResponseNotFound
+from django.http import HttpResponse, JsonResponse, HttpResponseRedirect, HttpResponseNotFound, HttpResponseForbidden
 from django.shortcuts import redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
@@ -19,8 +19,8 @@ from .debug_settings import *
 @login_required
 def home(request):
     if request.method == "POST":
-        for key in request.POST:
-            print(f"\t{key} => {request.POST[key]}")
+        # for key in request.POST:
+        #     print(f"\t{key} => {request.POST[key]}")
         request.POST = request.POST.copy() #create a mutable post
         request.POST['published'] = not getBool(request.POST['published'])
         auctionType = request.POST['type']
@@ -52,12 +52,21 @@ def getBool(str):
     else:
         return False
 
-@login_required
+def nukeDB():
+    Auction.objects.all().delete()
+    SilentItem.objects.all().delete()
+    LiveItem.objects.all().delete()
+    Rule.objects.all().delete()
+    AuctionUser.objects.all().delete()
+    # BidSilent.objects.all().delete()
+    # BidLive.objects.all().delete()
+
 def init_test_db(request):
     if DEBUG:
+        nukeDB()
         AuctionUser(
             username="user1",
-            password="pass1212",
+            password="letmepass",
             email="email@email.com",
             first_name="tommy",
             last_name="thompson",
@@ -65,12 +74,17 @@ def init_test_db(request):
         ).save()
         AuctionUser(
             username="user2",
-            password="pass1212",
+            password="letmepass",
             email="email@email.com",
             first_name="johnny",
             last_name="johnson",
             auction_number=10,
         ).save()
+        AuctionUser.objects.create_superuser(
+            username="admin",
+            email="admin@email.com",
+            password="letmepass"
+        )
         Rule(title="Rules & Announcements",
                 last_modified=timezone.now(),
                 rules_content="Insert rules here",
@@ -105,6 +119,11 @@ def init_test_db(request):
 
 @login_required
 def live(request):
+    #this prevents non admins from getting to this page if its not a published auction
+    liveAuction = Auction.objects.filter(type='live').first()
+    if not liveAuction.published and not request.user.is_superuser:
+        return redirect(home)
+
     try:
         Auction.objects.get(type='live')
     except Exception as e:
@@ -195,22 +214,56 @@ def randomString(stringLength=10):
     return ''.join(random.choice(letters) for i in range(stringLength))
        
 @login_required
-def silent(request):
+def create_item(request):
+    if request.method == "POST" and request.user.is_superuser:
+        for key in request.POST:
+            print(f"\t{key} => {request.POST[key]}")
+        request.POST = request.POST.copy() #make the post mutable
+        # #select the correct item type
+        # print(request.POST.get("auction", False))
+        # id = request.POST.get("auction", False)
+        # auction = Auction.objects.get(pk=id)
+        # print(auction)
+        # request.POST['auction'] = auction
+        request.POST['end'] = datetime.datetime.strptime(request.POST['end'], '%Y-%m-%dT%H:%M')
+        item = SilentItemForm(request.POST)
+            # auction = Auction.objects.filter(type=Auction.SILENT).first()
+            # request.POST['auction'] = auction
+        # elif request.POST.get("auction", False) == Auction.LIVE:
+        #     # auction = Auction.objects.filter(type=Auction.LIVE).first()
+        #     # request.POST['auction'] = auction
+        #     item = LiveItemForm(request.POST)
 
+        if item.is_valid():
+            item.save()
+        else:
+            print("invalid form request")
+            print(item.errors)
+
+        if request.POST.get("type", False) == 'silent':
+            return redirect(silent) 
+        elif request.POST.get("type", False) == 'live':
+            return redirect(live)
+    else:
+        return HttpResponseForbidden()
+
+@login_required                    
+def silent(request):
+    #this prevents non admins from getting to this page if its not a published auction
     silentAuction = Auction.objects.filter(type='silent').first()
     if not silentAuction.published and not request.user.is_superuser:
         return redirect(home)
-      
-    # SilentItem.objects.all().delete()
-    # Bid.objects.all().delete()
 
     winning, bidon, unbid = getBidItemForm(request)
+    createItemForm = SilentItemForm(initial={'auction':silentAuction})
 
     context = {
+        'createItemForm': createItemForm,
         'winning': winning,
         'bidon': bidon,
         'unbid': unbid
     }
+
 
 
     return render(request, 'silent.html', context)
@@ -254,11 +307,11 @@ def submit_bid(request):
             currentitem = SilentItem.objects.get(id=id)
             if currentitem.bid_set.count() > 0:
                 if float(amount) > currentitem.bid_set.order_by("amount").last().amount:
-                    new_bid = Bid(item=currentitem, amount=amount, user=AuctionUser.objects.get(username=request.user.username))
+                    new_bid = BidSilent(item=currentitem, amount=amount, user=AuctionUser.objects.get(username=request.user.username))
                     new_bid.save()
             else:
                 # this means there were no bids, create a new one
-                new_bid = Bid(item=currentitem, amount=amount, user=AuctionUser.objects.get(username=request.user.username))
+                new_bid = BidSilent(item=currentitem, amount=amount, user=AuctionUser.objects.get(username=request.user.username))
                 new_bid.save()
         else:
             # this means invalid data was posted
@@ -271,6 +324,11 @@ def submit_bid(request):
 def users(request):
     users = AuctionUser.objects.all()
     form = CreateAccountForm()
+    print(form.fields)
+    form.fields['password1'].widget = forms.HiddenInput()
+    form.initial['password1'] = "ax7!bwaZc"
+    form.fields['password2'].widget = forms.HiddenInput()
+    form.initial['password2'] = "ax7!bwaZc"
     if request.method == 'POST':
         form_data = request.POST.copy()
         form_data.update(password1="ax7!bwaZc")
@@ -278,21 +336,21 @@ def users(request):
         form = CreateAccountForm(form_data)
         # print(form.is_valid())
         if form.is_valid():
-            print("test\n")
             #save data
             form.save()
             users = AuctionUser.objects.all()
             form = CreateAccountForm()
             context = {
                 "users": users,
-                "form": form}
+                "form": form
+            }
             return render(request, 'users.html', context)
         else:
-            print(form.cleaned_data)
-            print(form.errors) #NEED TO PRINT SOME ERRORS TO THE USER SOMEHOW
             context = {
                 "users": users,
                 "form":form}
+            # print(form.cleaned_data)
+            # print(form.errors) #NEED TO PRINT SOME ERRORS TO THE USER SOMEHOW
             return render(request, 'users.html', context)
     else:
         #first visit

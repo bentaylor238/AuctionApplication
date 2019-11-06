@@ -1,7 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from .models import Rule, AuctionUser, Auction
-
+from .models import Rule, AuctionUser, Auction, SilentItem, LiveItem
 class RulesForm(forms.ModelForm):
     class Meta:
         model = Rule
@@ -24,6 +23,26 @@ class AuctionForm(forms.ModelForm):
     class Meta:
         model = Auction
         fields = ('published', 'type')
+    
+class SilentItemForm(forms.ModelForm):
+    class Meta:
+        model = SilentItem
+        fields = ('title','description','imageName','end','auction')
+        widgets = {
+            # 'start': forms.DateTimeInput(
+            #     attrs={'type':'datetime-local'}, 
+            #     format='%Y-%m-%dT%H:%M' #this is to match the html datetime-local format
+            # ), 
+            'end': forms.DateTimeInput(
+                attrs={'type':'datetime-local'}, 
+                format='%Y-%m-%dT%H:%M' #this is to match the html datetime-local format
+            ) 
+        }
+
+class LiveItemForm(forms.ModelForm):
+    class Meta:
+        model = LiveItem
+        fields = ('title','description','imageName','auction')
 
 #SAVED FOR AN EXAMPLE, NOT USED
 # class CreateAccount(forms.Form):
