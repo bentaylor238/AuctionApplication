@@ -115,12 +115,12 @@ def live(request):
     return render(request, 'live.html', context)
 
 def sellLiveItem(request):
-    try:
-        currentItem = LiveItem.objects.get(pk=request.POST['itemID']).sold= True
-        currentItem.sold = True
-        currentItem.save()
-    except Exception as e:
-        return HttpResponse('Error: the public key of the item that was bid on does not exit in the database. Django error: ' + str(e))
+    # try:
+    #     currentItem = LiveItem.objects.get(pk=request.POST['itemID']).sold= True
+    #     currentItem.sold = True
+    #     currentItem.save()
+    # except Exception as e:
+    #     return HttpResponse('Error: the public key of the item that was bid on does not exit in the database. Django error: ' + str(e))
 
     winner = request.POST['number']
     amount = request.POST['amount']
