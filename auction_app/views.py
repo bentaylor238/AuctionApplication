@@ -133,6 +133,11 @@ def sellLiveItem(request):
 @login_required
 def payment(request):
     users = AuctionUser.objects.all()
+    for user in users:
+        user.amount = 0
+    bids = Bid.objects.all()
+    for bid in bids:
+        bid.user.amount += bid.amount
     context={"users": users}#data to send to the html page goes here
     return render(request, 'payment.html', context)
 
