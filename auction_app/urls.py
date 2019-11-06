@@ -14,6 +14,7 @@ urlpatterns = [
     path('silent', views.silent, name='silent'),
     path('users', views.users, name='users'),
     path('payment', views.payment, name='payment'),
+    path('updateUserPayment', views.updateUserPayment, name='updateUserPayment'),
     path('afterLogin',views.afterLogin, name='afterLogin'),
     path('rules', views.rules, name='rules'),
     path('create_account', views.create_account, name='create_account'),

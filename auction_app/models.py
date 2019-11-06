@@ -41,11 +41,14 @@ class Rule(models.Model):
 
 class AuctionUser(AbstractUser):
     auction_number = models.IntegerField(default=None, blank=True, null=True)
+    has_paid = models.BooleanField(default=False, blank=True, null=True)
+    amount = models.FloatField(default=0)
 
 class Bid(models.Model):
     amount = models.FloatField(default=0)
     item = models.ForeignKey(SilentItem, on_delete=models.CASCADE)
     user = models.ForeignKey(AuctionUser, on_delete=models.CASCADE)
+    isWinning = models.BooleanField(default=True)
 
 # class SilentAuction(models.Model):
 #     published = models.BooleanField(default=False)

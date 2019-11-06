@@ -6,14 +6,31 @@
             <td>First Name</td>
             <td>Last Name</td>
             <td>Email</td>
+            <td>Username</td>
             <td>Auction Number</td>
+            <td>Payment Amount</td>
         </tr>
             {% for user in users %}
                 <tr>
                     <td>{{ user.first_name }}</td>
                     <td>{{ user.last_name }}</td>
                     <td>{{ user.email }}</td>
+                    <td>{{ user.username }}</td>
                     <td>{{ user.auction_number }}</td>
+                    <td>{{ user.amount }}</td>
+                    <td>
+                        <form method="post" action="updateUserPayment">
+                            {% csrf_token %}
+                            <label>Username:</label>
+                            <input type="text" name="username">
+                            {% if user.has_paid %}
+                                <input type="checkbox" name="paid" value="checked" checked>
+                            {% else %}
+                                <input type="checkbox" name="paid" value="checked">
+                            {% endif %}
+                            <button type="submit">Update Payment</button>
+                        </form>
+                    </td>
                 </tr>
             {% endfor %}
         {% else %}
