@@ -172,7 +172,7 @@ def silent(request):
     # SilentItem.objects.all().delete()
     # Bid.objects.all().delete()
 
-    winning, bidon, unbid = getBidItemForm1(request)
+    winning, bidon, unbid = getBidItemForm(request)
 
     context = {
         'winning': winning,
@@ -184,7 +184,7 @@ def silent(request):
     return render(request, 'silent.html', context)
 
 
-def getBidItemForm1(request):
+def getBidItemForm(request):
     winning = []
     bidon = []
     unbid = []
@@ -210,19 +210,6 @@ def getBidItemForm1(request):
     return winning, bidon, unbid
 
 
-def getBiggestBidForItem(item):
-    if Bid.objects.filter(item=item).count() > 0:
-        bids = Bid.objects.filter(item=item)
-        bigbid = Bid()
-        tracker = 0.0
-        for bid in bids:
-            if bid.amount >= tracker:
-                bigbid = bid
-                tracker = bigbid.amount
-        return bigbid.amount
-    else:
-        return 0
-
 @login_required
 def submit_bid(request):
     if request.method == 'POST':
@@ -232,8 +219,14 @@ def submit_bid(request):
         id = request.POST['item_id']
         bidform = BidForm(request.POST)
         if bidform.is_valid():
-            if float(amount) > getBiggestBidForItem(SilentItem.objects.get(id=id)):
-                new_bid = Bid(item=SilentItem.objects.get(id=id), amount=amount, user=AuctionUser.objects.get(username=request.user.username))
+            currentitem = SilentItem.objects.get(id=id)
+            if currentitem.bid_set.count() > 0:
+                if float(amount) > currentitem.bid_set.order_by("amount").last().amount:
+                    new_bid = Bid(item=currentitem, amount=amount, user=AuctionUser.objects.get(username=request.user.username))
+                    new_bid.save()
+            else:
+                # this means there were no bids, create a new one
+                new_bid = Bid(item=currentitem, amount=amount, user=AuctionUser.objects.get(username=request.user.username))
                 new_bid.save()
         else:
             # this means invalid data was posted
