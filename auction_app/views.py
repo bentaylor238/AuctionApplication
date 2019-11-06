@@ -141,6 +141,18 @@ def payment(request):
     context={"users": users}#data to send to the html page goes here
     return render(request, 'payment.html', context)
 
+def updateUserPayment(request):
+    username = request.POST['username']
+    user = AuctionUser.objects.get(username=username)
+    for var in request.POST:
+        print(var)
+    if 'paid' in request.POST:
+        user.has_paid = True
+    else:
+        user.has_paid = False
+    user.save()
+    return redirect(payment)
+
 @login_required
 def rules(request):
     #get a rules object from db or create a blank one
