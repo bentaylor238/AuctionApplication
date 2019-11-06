@@ -96,34 +96,39 @@ def init_test_db(request):
 
 @login_required
 def live(request):
-    # handle later
-    # if not liveAuction.published and not request.user.is_superuser:
-    #     return redirect(home)
+    try:
+        Auction.objects.get(type='live')
+    except Exception as e:
+        return HttpResponse("The live auction object does not yet exist. Create a live auction then try again. Django error message is " + str(e))
+
     try:
         currentItem = LiveItem.objects.filter(sold='False').order_by('orderInQueue')[0]
+        context = {
+            'currentItem': currentItem,
+            'items': LiveItem.objects.all().filter(sold=False).exclude(pk=currentItem.pk)
+        }
+        return render(request, 'live.html', context)
     except Exception as e:
         return HttpResponse("Error (there are probably more than one items in the database with an orderInQueue equal to 1. Here's the full error from django: " + str(e))
 
-    context = {
-        'currentItem': currentItem,
-        'items': LiveItem.objects.all().filter(sold=False).exclude(pk=currentItem.pk)
-    }
-    return render(request, 'live.html', context)
-
 def sellLiveItem(request):
     soldItem = LiveItem.objects.get(pk=request.POST['pk'])
-    soldItem.sold = True
-    soldItem.save()
-
     try:
         amount = request.POST['amount']
         user = AuctionUser.objects.get(auction_number=request.POST['auctionNumber'])
+        bid = BidLive(amount=amount, user=user, item=soldItem)
+        bid.save()
+        soldItem.sold = True
+        soldItem.save()
+        return redirect(live)
     except Exception as e:
-        return HttpResponse("Error in sellLiveItem try/catch block" + str(e))
-    # bid = Bid(amount=amount, user=user, item=soldItem)
-    # bid.save()
+        context = {
+            'item': soldItem,
+            'error': e,
+            'auctionNumber': request.POST['auctionNumber']
+        }
+        return render(request, 'liveErrorMessage.html', context)
 
-    return redirect(live)
 
 @login_required
 def payment(request):

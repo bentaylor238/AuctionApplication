@@ -38,11 +38,16 @@ class AuctionUser(AbstractUser):
     has_paid = models.BooleanField(default=False, blank=True, null=True)
     amount = models.FloatField(default=0)
 
-class Bid(models.Model):
+class BidSilent(models.Model):
     amount = models.FloatField(default=0)
     item = models.ForeignKey(SilentItem, on_delete=models.CASCADE)
     user = models.ForeignKey(AuctionUser, on_delete=models.CASCADE)
     isWinning = models.BooleanField(default=True)
+
+class BidLive(models.Model):
+    amount = models.FloatField()
+    item = models.ForeignKey(LiveItem, on_delete=models.CASCADE)
+    user = models.ForeignKey(AuctionUser, on_delete=models.CASCADE)
 
 # class SilentAuction(models.Model):
 #     published = models.BooleanField(default=False)

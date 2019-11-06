@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2> An Error Occurred </h2>
+<ul>
+    <li>You probably entered an auction number that doesn't exist. Double check that {{ auctionNumber }} is a valid auction number.</li>
+    <li>The item named {{ item.title }} was not marked as sold, and a new bid item was not created.</li>
+    <li>The official error message is "{{ error }}"</li>
+    <li>Click <a href="live">here </a> to redirect back to the live page.</li>
+</ul>
+{% endblock %}
