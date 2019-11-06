@@ -6,13 +6,15 @@ Description of current Item:{{ currentItem.description}}
 
 <form action='sellLiveItem', method="POST">
     {% csrf_token %}
-    <input type="text" name="number" id="winning_user">
+    <input type="number" name="auctionNumber" id="winning_user">
     <label for="winning_user">Auction Number of Winner:</label>
     <br>
-    <input type="text" name="amount" id="winning_amount">
+
+    <input type="number" name="amount" id="winning_amount">
     <label for="winning_amount">Winning Amount:</label>
     <br>
-    <intput type="text" name={{currentItem.title}}
+
+    <input type="hidden" name="pk" value="{{currentItem.pk}}">
     <button type="submit">Submit Winning Bid</button>
 </form>
 
@@ -23,24 +25,5 @@ Description of current Item:{{ currentItem.description}}
 <h5>{{ item.title }}</h5>
 {{ item.description }}
 {% endfor %}
-
-	<form action="receive" method='POST'>
-        {% csrf_token %}
-        <div>
-		    <label for="name">Name:</label>
-		    <input type="text" id="name" name="user_name">
-        </div>
-        <div>
-	        <label for="mail">E-mail:</label>
-	        <input type="email" id="mail" name="user_mail">
-        </div>
-        <div>
-	        <label for="msg">Message:</label>
-    	    <textarea id="msg" name="user_message"></textarea>
-        </div>
-        <div class="button">
-	        <button type="submit">This is the inner submit HTML button text</button>
-        </div>
-	</form>
 
 {% endblock %}
