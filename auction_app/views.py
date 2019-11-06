@@ -79,7 +79,7 @@ def init_test_db(request):
             item.save()
             user = AuctionUser.objects.all().first()
             user.save()
-            bid = Bid(amount=0, user=user, item=item).save()
+            Bid(amount=0, user=user, item=item).save()
 
             # populated the live database too
             itemLive = LiveItem(
@@ -90,7 +90,7 @@ def init_test_db(request):
                 orderInQueue=i
             )
             itemLive.save()
-        return redirect(login)
+        return HttpResponseRedirect("/home")
     else:
         return HttpResponseNotFound()
 
