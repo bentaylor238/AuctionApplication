@@ -87,8 +87,6 @@ def init_test_db(request):
             item.save()
             user = AuctionUser.objects.all().first()
             user.save()
-            bid = Bid(amount=0, user=user, item=item).save()
-
             # populated the live database too
             itemLive = LiveItem(
                 title=randomString(),
@@ -98,7 +96,7 @@ def init_test_db(request):
                 orderInQueue=i
             )
             itemLive.save()
-        return redirect(login)
+        return redirect("login")
     else:
         return HttpResponseNotFound()
 
@@ -190,7 +188,7 @@ def randomString(stringLength=10):
     letters = string.ascii_lowercase
     return ''.join(random.choice(letters) for i in range(stringLength))
        
-@login_required                    
+@login_required
 def silent(request):
 
     silentAuction = Auction.objects.filter(type='silent').first()
@@ -199,37 +197,44 @@ def silent(request):
       
     # SilentItem.objects.all().delete()
     # Bid.objects.all().delete()
-    #
-    # createMockItems()
 
-    context = getContextSilent(request)
+    winning, bidon, unbid = getBidItemForm(request)
+
+    context = {
+        'winning': winning,
+        'bidon': bidon,
+        'unbid': unbid
+    }
 
 
     return render(request, 'silent.html', context)
 
 
-def getBidItemForm():
-    mylist = []
-    bidlist = []
+def getBidItemForm(request):
+    winning = []
+    bidon = []
+    unbid = []
     for item in SilentItem.objects.all():
-        bidlist.append(getBiggestBidForItem(item))
-    itemlist = list(SilentItem.objects.all())
-    formlist = []
-    for form in SilentItem.objects.all():
-        formlist.append(BidForm(initial={'amount': getBiggestBidForItem(form).amount}))
-    for i in range(len(SilentItem.objects.all())):
-        mylist.append((bidlist[i], itemlist[i], formlist[i]))
-    return mylist
+        if item.bid_set:
+            winningbid = item.bid_set.order_by("amount").last()
+            if item.bid_set.filter(user__username=request.user.username).count() > 0:
+                # there is a bid for that user
+                if winningbid.user.username == request.user.username:
+                    # the user is the winning user
+                    # winningbid is a bid
+                    # item is the item
+                    winning.append((winningbid.amount, item, BidForm(initial={'amount': winningbid.amount})))
+                else:
+                    # the user has a bid but its not winning
+                    bidon.append((winningbid.amount, item, BidForm(initial={'amount': winningbid.amount})))
+            else:
+                # this means there is a bid for the item, but the current user has not bid on it
+                unbid.append((0, item, BidForm(initial={'amount': 0})))
+        else:
+            # there is no bid associated with the item
+            unbid.append((0, item, BidForm(initial={'amount': 0})))
+    return winning, bidon, unbid
 
-def getBiggestBidForItem(item):
-    bids = Bid.objects.filter(item=item)
-    bigbid = Bid()
-    tracker = 0.0
-    for bid in bids:
-        if bid.amount >= tracker:
-            bigbid = bid
-            tracker = bigbid.amount
-    return bigbid
 
 @login_required
 def submit_bid(request):
@@ -240,45 +245,20 @@ def submit_bid(request):
         id = request.POST['item_id']
         bidform = BidForm(request.POST)
         if bidform.is_valid():
-            if float(amount) > getBiggestBidForItem(SilentItem.objects.get(id=id)).amount:
-                new_bid = Bid(item=SilentItem.objects.get(id=id), amount=amount, user=AuctionUser.objects.get(username=request.user.username))
+            currentitem = SilentItem.objects.get(id=id)
+            if currentitem.bid_set.count() > 0:
+                if float(amount) > currentitem.bid_set.order_by("amount").last().amount:
+                    new_bid = Bid(item=currentitem, amount=amount, user=AuctionUser.objects.get(username=request.user.username))
+                    new_bid.save()
+            else:
+                # this means there were no bids, create a new one
+                new_bid = Bid(item=currentitem, amount=amount, user=AuctionUser.objects.get(username=request.user.username))
                 new_bid.save()
         else:
             # this means invalid data was posted
             print("invalid data")
 
     return HttpResponseRedirect("/silent")
-
-
-def getContextSilent(request):
-    # print('#####', request.user.username)
-    context = {
-        'objects': getCategories(request),
-    }
-    return context
-
-
-def getCategories(request):
-    biditemform = getBidItemForm()
-    winning = []
-    bidon = []
-    unbid = []
-    for bid, item, form in biditemform:
-        if str(bid.user) == str(request.user.username) and bid.amount != 0.0:
-            winning.append((bid, item, form))
-        elif userHasBidOn(item, request):
-            bidon.append((bid, item, form))
-        else:
-            unbid.append((bid, item, form))
-    return (winning, 'Winning'), (bidon, 'Bid On'), (unbid, 'Not Bid On')
-
-
-def userHasBidOn(item, request):
-    bids = Bid.objects.filter(item=item)
-    for bid in bids:
-        if str(bid.user) == str(request.user.username) and bid.amount != 0.0:
-            return True
-    return False
 
 
 @login_required
