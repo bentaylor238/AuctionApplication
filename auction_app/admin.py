@@ -1,6 +1,5 @@
 from django.contrib import admin
 from .models import *
-
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
@@ -17,8 +16,8 @@ class AuctionUserAdmin(UserAdmin):
 admin.site.register(AuctionUser, AuctionUserAdmin)
 admin.site.register(Rule)
 admin.site.register(SilentItem)
-admin.site.register(BidLive)
 admin.site.register(LiveItem)
+admin.site.register(BidLive)
 admin.site.register(BidSilent)
 admin.site.register(User)
 admin.site.register(Auction)

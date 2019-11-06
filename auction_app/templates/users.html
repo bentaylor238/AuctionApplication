@@ -36,14 +36,15 @@
     <form method="post">
         {% csrf_token %}
         <table>
-            <label>First Name</label>
+            {% comment %} <label>First Name</label>
             {{form.first_name}}<br>
             <label>Last Name</label>
             {{form.last_name}}<br>
             <label>Email Address</label>
             {{form.email}}<br>
             <label>Username</label>
-            {{form.username}}<br>
+            {{form.username}}<br> {% endcomment %}
+            {{form.as_table}}
         </table>
         <button type="submit">Create User</button>
     </form>
