@@ -114,9 +114,14 @@ def sellLiveItem(request):
     soldItem = LiveItem.objects.get(pk=request.POST['pk'])
     soldItem.sold = True
     soldItem.save()
-    auctionNumber = request.POST['auctionNumber']
-    amount = request.POST['amount']
 
+    try:
+        amount = request.POST['amount']
+        user = AuctionUser.objects.get(auction_number=request.POST['auctionNumber'])
+    except Exception as e:
+        return HttpResponse("Error in sellLiveItem try/catch block" + str(e))
+    # bid = Bid(amount=amount, user=user, item=soldItem)
+    # bid.save()
 
     return redirect(live)
 
