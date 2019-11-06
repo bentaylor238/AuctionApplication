@@ -41,12 +41,21 @@ def getBool(str):
     else:
         return False
 
-@login_required
+def nukeDB():
+    Auction.objects.all().delete()
+    SilentItem.objects.all().delete()
+    LiveItem.objects.all().delete()
+    Rule.objects.all().delete()
+    AuctionUser.objects.all().delete()
+    # BidSilent.objects.all().delete()
+    # BidLive.objects.all().delete()
+
 def init_test_db(request):
     if DEBUG:
+        nukeDB()
         AuctionUser(
             username="user1",
-            password="pass1212",
+            password="letmepass",
             email="email@email.com",
             first_name="tommy",
             last_name="thompson",
@@ -54,12 +63,17 @@ def init_test_db(request):
         ).save()
         AuctionUser(
             username="user2",
-            password="pass1212",
+            password="letmepass",
             email="email@email.com",
             first_name="johnny",
             last_name="johnson",
             auction_number=10,
         ).save()
+        AuctionUser.objects.create_superuser(
+            username="admin",
+            email="admin@email.com",
+            password="letmepass"
+        )
         Rule(title="Rules & Announcements",
                 last_modified=timezone.now(),
                 rules_content="Insert rules here",
@@ -79,7 +93,7 @@ def init_test_db(request):
             item.save()
             user = AuctionUser.objects.all().first()
             user.save()
-            bid = Bid(amount=0, user=user, item=item).save()
+            # bid = BidSilent(amount=0, user=user, item=item).save()
 
             # populated the live database too
             itemLive = LiveItem(
@@ -90,7 +104,7 @@ def init_test_db(request):
                 orderInQueue=i
             )
             itemLive.save()
-        return redirect(login)
+        return redirect('login')
     else:
         return HttpResponseNotFound()
 
@@ -140,7 +154,7 @@ def payment(request):
     users = AuctionUser.objects.all()
     for user in users:
         user.amount = 0
-    bids = Bid.objects.all()
+    bids = BidSilent.objects.all()
     for bid in bids:
         bid.user.amount += bid.amount
     context={"users": users}#data to send to the html page goes here
@@ -252,8 +266,8 @@ def getBidItemForm():
     return mylist
 
 def getBiggestBidForItem(item):
-    bids = Bid.objects.filter(item=item)
-    bigbid = Bid()
+    bids = BidSilent.objects.filter(item=item)
+    bigbid = BidSilent()
     tracker = 0.0
     for bid in bids:
         if bid.amount >= tracker:
@@ -272,7 +286,7 @@ def submit_bid(request):
         if bidform.is_valid():
             item = SilentItem.objects.get(id=id)
             if float(amount) > getBiggestBidForItem(item).amount:
-                new_bid = Bid(item=item, amount=amount, user=AuctionUser.objects.get(username=request.user.username))
+                new_bid = BidSilent(item=item, amount=amount, user=AuctionUser.objects.get(username=request.user.username))
                 new_bid.save()
         else:
             # this means invalid data was posted
@@ -297,7 +311,7 @@ def getCategories(request):
 
 
 def userHasBidOn(item, request):
-    bids = Bid.objects.filter(item=item)
+    bids = BidSilent.objects.filter(item=item)
     for bid in bids:
         if str(bid.user) == str(request.user.username) and bid.amount != 0.0:
             return True
