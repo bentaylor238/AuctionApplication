@@ -97,38 +97,28 @@ def init_test_db(request):
 @login_required
 def live(request):
     # handle later
-    # liveAuction = Auction.objects.filter(type='live').first()
     # if not liveAuction.published and not request.user.is_superuser:
     #     return redirect(home)
-
-
-    # add bidder # stuff
     try:
-        currentItem = LiveItem.objects.filter(sold=False).get(orderInQueue=1)
+        currentItem = LiveItem.objects.filter(sold='False').order_by('orderInQueue')[0]
     except Exception as e:
         return HttpResponse("Error (there are probably more than one items in the database with an orderInQueue equal to 1. Here's the full error from django: " + str(e))
 
     context = {
         'currentItem': currentItem,
-        'items': LiveItem.objects.all().filter(sold=False).exclude(orderInQueue=1)
+        'items': LiveItem.objects.all().filter(sold=False).exclude(pk=currentItem.pk)
     }
     return render(request, 'live.html', context)
 
 def sellLiveItem(request):
-    # try:
-    #     currentItem = LiveItem.objects.get(pk=request.POST['itemID']).sold= True
-    #     currentItem.sold = True
-    #     currentItem.save()
-    # except Exception as e:
-    #     return HttpResponse('Error: the public key of the item that was bid on does not exit in the database. Django error: ' + str(e))
-
-    winner = request.POST['number']
+    soldItem = LiveItem.objects.get(pk=request.POST['pk'])
+    soldItem.sold = True
+    soldItem.save()
+    auctionNumber = request.POST['auctionNumber']
     amount = request.POST['amount']
-    for liveItem in LiveItem.objects.all().filter(sold=False): # optimize by maintaining a pointer to the next item, or the index of the next item to be visited, rather than decrementing all items and querying for the fist item
-        liveItem.orderInQueue -= 1
-        liveItem.save()
 
-    return HttpResponse(str(winner) + str(amount))
+
+    return redirect(live)
 
 @login_required
 def payment(request):

@@ -6,12 +6,15 @@ Description of current Item:{{ currentItem.description}}
 
 <form action='sellLiveItem', method="POST">
     {% csrf_token %}
-    <input type="text" name="number" id="winning_user">
+    <input type="text" name="auctionNumber" id="winning_user">
     <label for="winning_user">Auction Number of Winner:</label>
     <br>
+
     <input type="text" name="amount" id="winning_amount">
     <label for="winning_amount">Winning Amount:</label>
     <br>
+
+    <input type="hidden" name="pk" value="{{currentItem.pk}}">
     <button type="submit">Submit Winning Bid</button>
 </form>
 
