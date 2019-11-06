@@ -164,7 +164,7 @@ def randomString(stringLength=10):
     letters = string.ascii_lowercase
     return ''.join(random.choice(letters) for i in range(stringLength))
        
-@login_required                    
+@login_required
 def silent(request):
 
     silentAuction = Auction.objects.filter(type='silent').first()
