@@ -10,4 +10,4 @@ __pycache__
 *.csv
 *.zip
 *.bak
-auction_app\migrations\*
+auction_app/migrations
