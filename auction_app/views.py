@@ -238,26 +238,18 @@ def silent(request):
     silentAuction = Auction.objects.filter(type='silent').first()
     if not silentAuction.published and not request.user.is_superuser:
         return redirect(home)
-      
-    # SilentItem.objects.all().delete()
-    # Bid.objects.all().delete()
 
     winning, bidon, unbid = getBidItemForm(request)
+    createItemForm = SilentItemForm(initial={'auction':silentAuction})
 
     context = {
+        'createItemForm': createItemForm,
         'winning': winning,
         'bidon': bidon,
         'unbid': unbid
     }
 
-    createItemForm = SilentItemForm(initial={'auction':silentAuction})
-    # createItemForm.fields['start'].widget = forms.DateTimeInput(attrs={'type':'datetime-local'})
-    # createItemForm.fields['end'].widget = forms.DateTimeInput(attrs={'type':'datetime-local'})
-    # createItemForm.fields['auction'].widget = forms.HiddenInput()
-    context = {
-        'objects': getCategories(request),
-        'createItem': createItemForm,
-    }
+
 
     return render(request, 'silent.html', context)
 
