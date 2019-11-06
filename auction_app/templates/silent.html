@@ -62,7 +62,7 @@
     <form action="{% url "create_item" %}" method="post">
         {% csrf_token %}
         <table>
-            {{createItem.as_table}}
+            {{createItemForm.as_table}}
         </table>
         <input type="hidden" name="type" value="silent"></input>
         <button type="submit">Submit</button>

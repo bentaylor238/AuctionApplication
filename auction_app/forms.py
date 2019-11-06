@@ -28,11 +28,7 @@ class SilentItemForm(forms.ModelForm):
     class Meta:
         model = SilentItem
         fields = ('title','description','imageName','end','auction')
-        widgets = {
-            # 'start': forms.DateTimeInput(
-            #     attrs={'type':'datetime-local'}, 
-            #     format='%Y-%m-%dT%H:%M' #this is to match the html datetime-local format
-            # ), 
+        widgets = { 
             'end': forms.DateTimeInput(
                 attrs={'type':'datetime-local'}, 
                 format='%Y-%m-%dT%H:%M' #this is to match the html datetime-local format

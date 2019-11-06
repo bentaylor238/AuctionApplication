@@ -248,9 +248,6 @@ def silent(request):
         'bidon': bidon,
         'unbid': unbid
     }
-
-
-
     return render(request, 'silent.html', context)
 
 
@@ -259,9 +256,9 @@ def getBidItemForm(request):
     bidon = []
     unbid = []
     for item in SilentItem.objects.all():
-        if item.bid_set:
-            winningbid = item.bid_set.order_by("amount").last()
-            if item.bid_set.filter(user__username=request.user.username).count() > 0:
+        if item.bidsilent_set:
+            winningbid = item.bidsilent_set.order_by("amount").last()
+            if item.bidsilent_set.filter(user__username=request.user.username).count() > 0:
                 # there is a bid for that user
                 if winningbid.user.username == request.user.username:
                     # the user is the winning user
@@ -290,8 +287,8 @@ def submit_bid(request):
         bidform = BidForm(request.POST)
         if bidform.is_valid():
             currentitem = SilentItem.objects.get(id=id)
-            if currentitem.bid_set.count() > 0:
-                if float(amount) > currentitem.bid_set.order_by("amount").last().amount:
+            if currentitem.bidsilent_set.count() > 0:
+                if float(amount) > currentitem.bidsilent_set.order_by("amount").last().amount:
                     new_bid = BidSilent(item=currentitem, amount=amount, user=AuctionUser.objects.get(username=request.user.username))
                     new_bid.save()
             else:
