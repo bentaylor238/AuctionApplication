@@ -136,8 +136,6 @@ def silent(request):
       
     # SilentItem.objects.all().delete()
     # Bid.objects.all().delete()
-    #
-    # createMockItems()
 
     context = getContextSilent(request)
 
