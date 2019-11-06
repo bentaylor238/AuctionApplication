@@ -32,7 +32,15 @@ def home(request):
     liveAuction = Auction.objects.filter(type='live').first()
     liveForm = AuctionForm(instance=liveAuction)
     auctionForms = [silentForm, liveForm]
-    context={"forms":auctionForms} #data to send to the html page goes here
+
+    user = request.user
+    userBids = Bid.objects.filter(user__id=user.id)
+    for bid in userBids:
+        if bid.isWinning:
+            user.amount+=bid.amount
+
+    context={"forms":auctionForms,
+             "user": user} #data to send to the html page goes here
     return render(request, 'home.html', context)
 
 def getBool(str):
@@ -137,7 +145,8 @@ def payment(request):
         user.amount = 0
     bids = Bid.objects.all()
     for bid in bids:
-        bid.user.amount += bid.amount
+        if bid.isWinning:
+            bid.user.amount += bid.amount
     context={"users": users}#data to send to the html page goes here
     return render(request, 'payment.html', context)
 
