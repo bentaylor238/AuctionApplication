@@ -66,22 +66,22 @@ def nukeDB():
 def init_test_db(request):
     if DEBUG:
         nukeDB()
-        AuctionUser(
+        AuctionUser.objects.create_user(
             username="user1",
             password="letmepass",
             email="email@email.com",
             first_name="tommy",
             last_name="thompson",
             auction_number=20,
-        ).save()
-        AuctionUser(
+        )
+        AuctionUser.objects.create_user(
             username="user2",
             password="letmepass",
             email="email@email.com",
             first_name="johnny",
             last_name="johnson",
             auction_number=10,
-        ).save()
+        )
         AuctionUser.objects.create_superuser(
             username="admin",
             email="admin@email.com",
@@ -126,6 +126,8 @@ def live(request):
     if not liveAuction.published and not request.user.is_superuser:
         return redirect(home)
 
+    createItemForm = LiveItemForm(initial={'auction':liveAuction})
+
     try:
         Auction.objects.get(type='live')
     except Exception as e:
@@ -135,7 +137,9 @@ def live(request):
         currentItem = LiveItem.objects.filter(sold='False').order_by('orderInQueue')[0]
         context = {
             'currentItem': currentItem,
-            'items': LiveItem.objects.all().filter(sold=False).exclude(pk=currentItem.pk)
+            'published': liveAuction.published,
+            'items': LiveItem.objects.all().filter(sold=False).exclude(pk=currentItem.pk),
+            "createItemForm":createItemForm,
         }
         return render(request, 'live.html', context)
     except Exception as e:
@@ -224,32 +228,33 @@ def create_item(request):
         for key in request.POST:
             print(f"\t{key} => {request.POST[key]}")
         request.POST = request.POST.copy() #make the post mutable
-        # #select the correct item type
-        # print(request.POST.get("auction", False))
-        # id = request.POST.get("auction", False)
-        # auction = Auction.objects.get(pk=id)
-        # print(auction)
+        auctionType = request.POST.get('type', "")
+        
+        # auction = Auction.objects.filter(type=auctionType).first()
         # request.POST['auction'] = auction
-        request.POST['end'] = datetime.datetime.strptime(request.POST['end'], '%Y-%m-%dT%H:%M')
-        item = SilentItemForm(request.POST)
-            # auction = Auction.objects.filter(type=Auction.SILENT).first()
-            # request.POST['auction'] = auction
-        # elif request.POST.get("auction", False) == Auction.LIVE:
-        #     # auction = Auction.objects.filter(type=Auction.LIVE).first()
-        #     # request.POST['auction'] = auction
-        #     item = LiveItemForm(request.POST)
+        
+        if auctionType =='silent':
+            #format the date time input
+            if request.POST.get('end'):
+                request.POST['end'] = datetime.datetime.strptime(request.POST['end'], '%Y-%m-%dT%H:%M')
+            else:
+                request.POST['end'] = None
+            item = SilentItemForm(request.POST)
+        elif auctionType == 'live':
+            item = LiveItemForm(request.POST)
 
+        #check if valid before saving
         if item.is_valid():
             item.save()
         else:
-            print("invalid form request")
-            print(item.errors)
+            print("invalid item")
 
-        if request.POST.get("type", False) == 'silent':
+        if auctionType == 'silent':
             return redirect(silent) 
-        elif request.POST.get("type", False) == 'live':
+        elif auctionType == 'live':
             return redirect(live)
     else:
+        #not authorized to make request
         return HttpResponseForbidden()
 
 @login_required                    
@@ -263,14 +268,12 @@ def silent(request):
     createItemForm = SilentItemForm(initial={'auction':silentAuction})
 
     context = {
+        'published': silentAuction.published,
         'createItemForm': createItemForm,
         'winning': winning,
         'bidon': bidon,
         'unbid': unbid
     }
-
-
-
     return render(request, 'silent.html', context)
 
 

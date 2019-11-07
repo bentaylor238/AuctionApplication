@@ -20,16 +20,19 @@ class Item(models.Model):
         abstract = True
     title = models.CharField(max_length=200, default='')
     description = models.CharField(max_length=200, default='')
-    date = models.DateTimeField(datetime.datetime.now(), default=datetime.datetime.now())
+    date = models.DateTimeField(datetime.datetime.now(), default=datetime.datetime.now(), blank=True, null=True)
     imageName = models.CharField(max_length=50, default='')
     auction = models.ForeignKey(Auction, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.title
 
 class SilentItem(Item):
     end = models.DateTimeField(default=None, blank=True, null=True)
 
 class LiveItem(Item):
     sold=models.BooleanField(default=False)
-    orderInQueue = models.IntegerField()
+    orderInQueue = models.IntegerField(default=0)
 
 class Rule(models.Model):
     title = models.CharField(max_length=200)

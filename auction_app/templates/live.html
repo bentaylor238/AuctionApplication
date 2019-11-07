@@ -1,9 +1,22 @@
 {% extends 'base.html' %}
 {% block content %}
 
+{% if user.is_superuser and not published %}
+<h3> Create Item </h3>
+<form action="{% url "create_item" %}" method="post">
+    {% csrf_token %}
+    <table>
+        {{createItemForm.as_table}}
+    </table>
+    <input type="hidden" name="type" value="live"></input>
+    <button type="submit">Submit</button>
+</form>
+{% endif %}
+
 <h3>Current Item: {{currentItem.title}}</h3>
 Description of current Item:{{ currentItem.description}}
 
+{% if published%}
 <form action='sellLiveItem', method="POST">
     {% csrf_token %}
     <input type="number" name="auctionNumber" id="winning_user">
@@ -17,6 +30,7 @@ Description of current Item:{{ currentItem.description}}
     <input type="hidden" name="pk" value="{{currentItem.pk}}">
     <button type="submit">Submit Winning Bid</button>
 </form>
+{% endif %}
 
 <br><br><br>
 <h4>Items on Deck:</h4>
@@ -25,5 +39,6 @@ Description of current Item:{{ currentItem.description}}
 <h5>{{ item.title }}</h5>
 {{ item.description }}
 {% endfor %}
+
 
 {% endblock %}
