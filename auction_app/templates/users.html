@@ -21,8 +21,7 @@
                             {% csrf_token %}
                             <label>Auction Number</label>
                             <input type="text" name="auction_number">
-                            <label>Username</label>
-                            <input type="text" name="username">
+                            <input type="hidden" name="username" value="{{ user.username }}">
                             <button type="submit">Update Auction Number</button>
                         </form>
                     </td>
