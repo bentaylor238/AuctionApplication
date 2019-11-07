@@ -26,4 +26,12 @@ Description of current Item:{{ currentItem.description}}
 {{ item.description }}
 {% endfor %}
 
+<form action="{% url "create_item" %}" method="post">
+    {% csrf_token %}
+    <table>
+        {{createItemForm.as_table}}
+    </table>
+    <input type="hidden" name="type" value="live"></input>
+    <button type="submit">Submit</button>
+</form>
 {% endblock %}

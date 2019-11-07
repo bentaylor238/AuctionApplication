@@ -32,13 +32,17 @@ class SilentItemForm(forms.ModelForm):
             'end': forms.DateTimeInput(
                 attrs={'type':'datetime-local'}, 
                 format='%Y-%m-%dT%H:%M' #this is to match the html datetime-local format
-            ) 
+            ),
+            'auction':forms.HiddenInput()
         }
 
 class LiveItemForm(forms.ModelForm):
     class Meta:
         model = LiveItem
         fields = ('title','description','imageName','auction')
+        widgets ={
+            'auction':forms.HiddenInput()
+        }
 
 #SAVED FOR AN EXAMPLE, NOT USED
 # class CreateAccount(forms.Form):

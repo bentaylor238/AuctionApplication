@@ -11,7 +11,15 @@ class AuctionUserAdmin(UserAdmin):
     add_form = CreateAccountForm
     form = UpdateAccountForm
     model = AuctionUser
-    # list_display = ['first_name','last_name','email',]
+    fieldsets = UserAdmin.fieldsets + (
+        (None, {
+            'fields':
+            ('auction_number','has_paid','amount')
+        }),
+    )
+
+
+admin.site.site_header = "Auction Admin"
 
 admin.site.register(AuctionUser, AuctionUserAdmin)
 admin.site.register(Rule)
@@ -21,3 +29,4 @@ admin.site.register(BidLive)
 admin.site.register(BidSilent)
 admin.site.register(User)
 admin.site.register(Auction)
+
