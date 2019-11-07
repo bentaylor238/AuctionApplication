@@ -291,19 +291,20 @@ def submit_bid(request):
         amount = request.POST['amount']
         id = request.POST['item_id']
         bidform = BidForm(request.POST)
-        if bidform.is_valid():
-            currentitem = SilentItem.objects.get(id=id)
-            if currentitem.bidsilent_set.count() > 0:
-                if float(amount) > currentitem.bidsilent_set.order_by("amount").last().amount:
+        if float(amount) > 0:
+            if bidform.is_valid():
+                currentitem = SilentItem.objects.get(id=id)
+                if currentitem.bidsilent_set.count() > 0:
+                    if float(amount) > currentitem.bid_set.order_by("amount").last().amount:
+                        new_bid = BidSilent(item=currentitem, amount=amount, user=AuctionUser.objects.get(username=request.user.username))
+                        new_bid.save()
+                else:
+                    # this means there were no bids, create a new one
                     new_bid = BidSilent(item=currentitem, amount=amount, user=AuctionUser.objects.get(username=request.user.username))
                     new_bid.save()
             else:
-                # this means there were no bids, create a new one
-                new_bid = BidSilent(item=currentitem, amount=amount, user=AuctionUser.objects.get(username=request.user.username))
-                new_bid.save()
-        else:
-            # this means invalid data was posted
-            print("invalid data")
+                # this means invalid data was posted
+                print("invalid data")
 
     return HttpResponseRedirect("/silent")
 
