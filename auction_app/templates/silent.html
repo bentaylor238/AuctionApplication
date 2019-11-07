@@ -1,6 +1,17 @@
 {% extends 'base.html' %}
 {% block content %}
     <h2>Silent auction page</h2>
+    {% if user.is_superuser and not published%}
+    <h3>Create New Item</h3>
+    <form action="{% url "create_item" %}" method="post">
+        {% csrf_token %}
+        <table>
+            {{createItemForm.as_table}}
+        </table>
+        <input type="hidden" name="type" value="silent"></input>
+        <button type="submit">Submit</button>
+    </form>
+    {% endif %}
     <h3>Winning</h3>
     {% if winning %}
         {% for bid, item, form in winning %}
@@ -9,12 +20,14 @@
             <p>Description: {{ item.description }}</p>
             <p>Image Name: {{ item.imageName }} </p>
             <p>Current Bid: {{ bid }}</p>
+            {% if published %}
             <form action="{% url 'submit_bid' %}" method="post">
                 {% csrf_token %}
                 {{ form.as_p }}
                 <input type="hidden" name="item_id" value="{{ item.id }}" />
                 <button type="submit">Bid</button>
             </form>
+            {% endif %}
             </div>
         {% endfor %}
     {% else %}
@@ -28,12 +41,14 @@
             <p>Description: {{ item.description }}</p>
             <p>Image Name: {{ item.imageName }} </p>
             <p>Current Bid: {{ bid }}</p>
+            {% if published %}
             <form action="{% url 'submit_bid' %}" method="post">
                 {% csrf_token %}
                 {{ form.as_p }}
                 <input type="hidden" name="item_id" value="{{ item.id }}" />
                 <button type="submit">Bid</button>
             </form>
+            {% endif %}
             </div>
         {% endfor %}
     {% else %}
@@ -47,24 +62,18 @@
             <p>Description: {{ item.description }}</p>
             <p>Image Name: {{ item.imageName }} </p>
             <p>Current Bid: {{ bid }}</p>
+            {% if published %}
             <form action="{% url 'submit_bid' %}" method="post">
                 {% csrf_token %}
                 {{ form.as_p }}
                 <input type="hidden" name="item_id" value="{{ item.id }}" />
                 <button type="submit">Bid</button>
             </form>
+            {% endif %}
             </div>
         {% endfor %}
     {% else %}
         <strong>No items match the criteria</strong>
     {% endif %}
-    <h3>Create New Item</h3>
-    <form action="{% url "create_item" %}" method="post">
-        {% csrf_token %}
-        <table>
-            {{createItemForm.as_table}}
-        </table>
-        <input type="hidden" name="type" value="silent"></input>
-        <button type="submit">Submit</button>
-    </form>
+
 {% endblock %}

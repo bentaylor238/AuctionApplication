@@ -248,6 +248,7 @@ def silent(request):
     createItemForm = SilentItemForm(initial={'auction':silentAuction})
 
     context = {
+        'published': silentAuction.published,
         'createItemForm': createItemForm,
         'winning': winning,
         'bidon': bidon,
