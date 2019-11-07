@@ -4,7 +4,6 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from .forms import CreateAccountForm, UpdateAccountForm
-
 from .models import AuctionUser, Rule
 
 class AuctionUserAdmin(UserAdmin):
@@ -18,6 +17,9 @@ class AuctionUserAdmin(UserAdmin):
         }),
     )
 
+class BidAdmin(admin.ModelAdmin):
+    list_display = ('user', 'item', 'amount')
+
 
 admin.site.site_header = "Auction Admin"
 
@@ -25,8 +27,8 @@ admin.site.register(AuctionUser, AuctionUserAdmin)
 admin.site.register(Rule)
 admin.site.register(SilentItem)
 admin.site.register(LiveItem)
-admin.site.register(BidLive)
-admin.site.register(BidSilent)
+admin.site.register(BidLive, BidAdmin)
+admin.site.register(BidSilent, BidAdmin)
 admin.site.register(User)
 admin.site.register(Auction)
 
