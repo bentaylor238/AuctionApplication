@@ -32,6 +32,8 @@
             {% if forms.1.published.value %}
                 <a href="{% url "live" %}"/> live auction</a> <br>
             {% endif %}
+            <label>Total Amount Bid: </label>
+            <p>{{ user.amount }}</p>
         {% endif %}
     {% endif %}
 {% endblock %}

@@ -32,7 +32,20 @@ def home(request):
     liveAuction = Auction.objects.filter(type='live').first()
     liveForm = AuctionForm(instance=liveAuction)
     auctionForms = [silentForm, liveForm]
-    context={"forms":auctionForms} #data to send to the html page goes here
+
+    user = request.user
+    user.amount = 0
+    userBids = BidSilent.objects.filter(user__id=user.id)
+    for bid in userBids:
+        if bid.isWinning:
+            user.amount+=bid.amount
+    userBids = BidLive.objects.filter(user__id=user.id)
+    for bid in userBids:
+        user.amount+=bid.amount
+    print(user.amount)
+    user.save()
+    context={"forms":auctionForms,
+             "user": user} #data to send to the html page goes here
     return render(request, 'home.html', context)
 
 def getBool(str):
@@ -151,10 +164,17 @@ def sellLiveItem(request):
 def payment(request):
     users = AuctionUser.objects.all()
     for user in users:
-        user.amount = 0
-    bids = BidSilent.objects.all()
-    for bid in bids:
-        bid.user.amount += bid.amount
+        user.amount = 0.0
+        bids = BidSilent.objects.filter(user__id=user.id)
+        for bid in bids:
+            if bid.isWinning:
+                user.amount += bid.amount
+                print(bid.user, bid.amount)
+        bids = BidLive.objects.filter(user__id=user.id)
+        for bid in bids:
+            user.amount += bid.amount
+            print(bid.amount, bid.user, bid.user.amount)
+        user.save()
     context={"users": users}#data to send to the html page goes here
     return render(request, 'payment.html', context)
 
@@ -292,7 +312,7 @@ def submit_bid(request):
             if bidform.is_valid():
                 currentitem = SilentItem.objects.get(id=id)
                 if currentitem.bidsilent_set.count() > 0:
-                    if float(amount) > currentitem.bid_set.order_by("amount").last().amount:
+                    if float(amount) > currentitem.bidsilent_set.order_by("amount").last().amount:
                         new_bid = BidSilent(item=currentitem, amount=amount, user=AuctionUser.objects.get(username=request.user.username))
                         new_bid.save()
                 else:

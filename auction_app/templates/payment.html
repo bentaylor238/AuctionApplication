@@ -9,6 +9,7 @@
             <td>Username</td>
             <td>Auction Number</td>
             <td>Payment Amount</td>
+            <td>Has Paid</td>
         </tr>
             {% for user in users %}
                 <tr>
@@ -21,8 +22,7 @@
                     <td>
                         <form method="post" action="updateUserPayment">
                             {% csrf_token %}
-                            <label>Username:</label>
-                            <input type="text" name="username">
+                            <input type="hidden" name="username" value="{{ user.username }}">
                             {% if user.has_paid %}
                                 <input type="checkbox" name="paid" value="checked" checked>
                             {% else %}
