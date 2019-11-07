@@ -124,6 +124,7 @@ def live(request):
         currentItem = LiveItem.objects.filter(sold='False').order_by('orderInQueue')[0]
         context = {
             'currentItem': currentItem,
+            'published': liveAuction.published,
             'items': LiveItem.objects.all().filter(sold=False).exclude(pk=currentItem.pk),
             "createItemForm":createItemForm,
         }
