@@ -274,7 +274,7 @@ def silent(request):
     if not silentAuction.published and not request.user.is_superuser:
         return redirect(home)
 
-    winning, bidon, unbid = getBidItemForm(request)
+    winning, bidon, unbid = getItemLists(request)
     createItemForm = SilentItemForm(initial={'auction':silentAuction})
 
     context = {
@@ -287,12 +287,12 @@ def silent(request):
     return render(request, 'silent.html', context)
 
 
-def getBidItemForm(request):
+def getItemLists(request):
     winning = []
     bidon = []
     unbid = []
     for item in SilentItem.objects.all():
-        if item.bidsilent_set:
+        if item.bidsilent_set.count() > 0:
             winningbid = item.bidsilent_set.order_by("amount").last()
             if item.bidsilent_set.filter(user__username=request.user.username).count() > 0:
                 # there is a bid for that user
@@ -306,7 +306,7 @@ def getBidItemForm(request):
                     bidon.append((winningbid.amount, item, BidForm(initial={'amount': winningbid.amount})))
             else:
                 # this means there is a bid for the item, but the current user has not bid on it
-                unbid.append((0, item, BidForm(initial={'amount': 0})))
+                unbid.append((winningbid.amount, item, BidForm(initial={'amount': winningbid.amount})))
         else:
             # there is no bid associated with the item
             unbid.append((0, item, BidForm(initial={'amount': 0})))
