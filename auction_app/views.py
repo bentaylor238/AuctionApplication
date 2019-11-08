@@ -48,11 +48,13 @@ def home(request):
              "user": user} #data to send to the html page goes here
     return render(request, 'home.html', context)
 
+
 def getBool(str):
     if str.lower() == 'true':
         return True
     else:
         return False
+
 
 def nukeDB():
     Auction.objects.all().delete()
@@ -62,6 +64,7 @@ def nukeDB():
     AuctionUser.objects.all().delete()
     # BidSilent.objects.all().delete()
     # BidLive.objects.all().delete()
+
 
 def init_test_db(request):
     if DEBUG:
@@ -119,6 +122,7 @@ def init_test_db(request):
     else:
         return HttpResponseNotFound()
 
+
 @login_required
 def live(request):
     #this prevents non admins from getting to this page if its not a published auction
@@ -144,6 +148,7 @@ def live(request):
         return render(request, 'live.html', context)
     except Exception as e:
         return HttpResponse("Error (there are probably more than one items in the database with an orderInQueue equal to 1. Here's the full error from django: " + str(e))
+
 
 def sellLiveItem(request):
     soldItem = LiveItem.objects.get(pk=request.POST['pk'])
@@ -182,6 +187,7 @@ def payment(request):
     context={"users": users}#data to send to the html page goes here
     return render(request, 'payment.html', context)
 
+
 def updateUserPayment(request):
     username = request.POST['username']
     user = AuctionUser.objects.get(username=username)
@@ -193,6 +199,7 @@ def updateUserPayment(request):
         user.has_paid = False
     user.save()
     return redirect(payment)
+
 
 @login_required
 def rules(request):
@@ -218,10 +225,12 @@ def rules(request):
         }
     return render(request, 'rules.html', context)
 
+
 def randomString(stringLength=10):
     letters = string.ascii_lowercase
     return ''.join(random.choice(letters) for i in range(stringLength))
        
+
 @login_required
 def create_item(request):
     if request.method == "POST" and request.user.is_superuser:
@@ -256,6 +265,7 @@ def create_item(request):
     else:
         #not authorized to make request
         return HttpResponseForbidden()
+
 
 @login_required                    
 def silent(request):
@@ -332,40 +342,30 @@ def submit_bid(request):
 @login_required
 def users(request):
     users = AuctionUser.objects.all()
-    form = CreateAccountForm()
-    print(form.fields)
-    form.fields['password1'].widget = forms.HiddenInput()
-    form.initial['password1'] = "ax7!bwaZc"
-    form.fields['password2'].widget = forms.HiddenInput()
-    form.initial['password2'] = "ax7!bwaZc"
+    form = CreateAccountFormHiddenPass()
     if request.method == 'POST':
+        #set password fields
         form_data = request.POST.copy()
         form_data.update(password1="ax7!bwaZc")
         form_data.update(password2="ax7!bwaZc")
-        form = CreateAccountForm(form_data)
-        # print(form.is_valid())
+        #fill form with data
+        form = CreateAccountFormHiddenPass(form_data)
         if form.is_valid():
             #save data
             form.save()
-            users = AuctionUser.objects.all()
-            form = CreateAccountForm()
-            context = {
-                "users": users,
-                "form": form
-            }
-            return render(request, 'users.html', context)
+            return redirect("users")
         else:
+            #invalid post
             context = {
                 "users": users,
                 "form":form}
-            # print(form.cleaned_data)
-            # print(form.errors) #NEED TO PRINT SOME ERRORS TO THE USER SOMEHOW
             return render(request, 'users.html', context)
     else:
         #first visit
         context={"users": users,
                  "form": form}#data to send to the html page goes here
         return render(request, 'users.html', context)
+
 
 @login_required
 def afterLogin(request):
@@ -375,6 +375,7 @@ def afterLogin(request):
         return redirect(home)
     else:
         return redirect(rules)
+
 
 @login_required
 def updateAuctionNumber(request):
@@ -386,6 +387,7 @@ def updateAuctionNumber(request):
     user.auction_number = request.POST['auction_number']
     user.save()
     return redirect(users)
+
 
 #great example of form handling
 def create_account(request):

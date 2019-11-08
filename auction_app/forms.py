@@ -14,6 +14,15 @@ class CreateAccountForm(UserCreationForm):
         model = AuctionUser
         fields = ('first_name','last_name', 'username','email',)
 
+class CreateAccountFormHiddenPass(UserCreationForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['password1'].widget = forms.HiddenInput()
+        self.fields['password2'].widget = forms.HiddenInput()
+    class Meta:
+        model = AuctionUser
+        fields = ('first_name','last_name','username','email',)
+
 class UpdateAccountForm(UserChangeForm):
     class Meta:
         model = AuctionUser
