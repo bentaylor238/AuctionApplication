@@ -191,15 +191,18 @@ def payment(request):
     users = AuctionUser.objects.all()
     for user in users:
         user.amount = 0.0
+        # for silent
         bids = BidSilent.objects.filter(user__id=user.id)
         for bid in bids:
             if bid.isWinning:
                 user.amount += bid.amount
                 print(bid.user, bid.amount)
-        # bids = BidLive.objects.filter(user__id=user.id)
-        # for bid in bids:
-        #     user.amount += bid.amount
-        #     print(bid.amount, bid.user, bid.user.amount)
+
+        # for live
+        items = LiveItem.objects.filter(user__id=user.id)
+        for item in items:
+            user.amount += item.amount
+            print(item.amount, item.user)
         user.save()
     context={"users": users}#data to send to the html page goes here
     return render(request, 'payment.html', context)
