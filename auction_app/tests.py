@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 from auction_app.forms import *
 from django.utils import timezone
+from auction_app.views import timezone, randomString
 
 # helper function to set up databse
 def init_test_db():
