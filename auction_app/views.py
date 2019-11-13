@@ -6,7 +6,7 @@ from django.shortcuts import render
 from .models import *
 from .forms import *
 from django.utils import timezone
-from django.http import HttpResponse, JsonResponse, HttpResponseRedirect, HttpResponseNotFound, HttpResponseForbidden
+from django.http import HttpResponse, JsonResponse, HttpResponseRedirect, HttpResponseNotFound, HttpResponseForbidden, HttpResponseServerError
 from django.shortcuts import redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
@@ -48,11 +48,13 @@ def home(request):
              "user": user} #data to send to the html page goes here
     return render(request, 'home.html', context)
 
+
 def getBool(str):
     if str.lower() == 'true':
         return True
     else:
         return False
+
 
 def nukeDB():
     Auction.objects.all().delete()
@@ -61,6 +63,7 @@ def nukeDB():
     Rule.objects.all().delete()
     AuctionUser.objects.all().delete()
     # BidSilent.objects.all().delete()
+
 
 def init_test_db(request):
     if DEBUG:
@@ -119,6 +122,22 @@ def init_test_db(request):
         return HttpResponseNotFound()
 
 @login_required
+def delete_item(request):
+    if request.method == "POST" and request.user.is_superuser:
+        auctionType = request.POST.get('type', "")
+        pk = request.POST.get('pk',None)
+        if auctionType == "silent":
+            items = SilentItem.objects
+        elif auctionType == "live":
+            items = LiveItem.objects
+        else:
+            return HttpResponseServerError()
+        items.get(pk=pk).delete()
+        return redirect(auctionType)
+    return HttpResponseNotFound()
+
+
+@login_required
 def live(request):
     # this prevents non admins from getting to this page if its not a published auction
     liveAuction = Auction.objects.filter(type='live').first()
@@ -144,6 +163,7 @@ def live(request):
         "createItemForm":createItemForm,
     }
     return render(request, 'live.html', context)
+
 
 
 def sellLiveItem(request):
@@ -181,6 +201,7 @@ def payment(request):
     context={"users": users}#data to send to the html page goes here
     return render(request, 'payment.html', context)
 
+
 def updateUserPayment(request):
     username = request.POST['username']
     user = AuctionUser.objects.get(username=username)
@@ -192,6 +213,7 @@ def updateUserPayment(request):
         user.has_paid = False
     user.save()
     return redirect(payment)
+
 
 @login_required
 def rules(request):
@@ -217,10 +239,12 @@ def rules(request):
         }
     return render(request, 'rules.html', context)
 
+
 def randomString(stringLength=10):
     letters = string.ascii_lowercase
     return ''.join(random.choice(letters) for i in range(stringLength))
        
+
 @login_required
 def create_item(request):
     if request.method == "POST" and request.user.is_superuser:
@@ -256,6 +280,7 @@ def create_item(request):
         #not authorized to make request
         return HttpResponseForbidden()
 
+
 @login_required                    
 def silent(request):
     #this prevents non admins from getting to this page if its not a published auction
@@ -263,7 +288,7 @@ def silent(request):
     if not silentAuction.published and not request.user.is_superuser:
         return redirect(home)
 
-    winning, bidon, unbid = getBidItemForm(request)
+    winning, bidon, unbid = getItemLists(request)
     createItemForm = SilentItemForm(initial={'auction':silentAuction})
 
     context = {
@@ -276,12 +301,12 @@ def silent(request):
     return render(request, 'silent.html', context)
 
 
-def getBidItemForm(request):
+def getItemLists(request):
     winning = []
     bidon = []
     unbid = []
     for item in SilentItem.objects.all():
-        if item.bidsilent_set:
+        if item.bidsilent_set.count() > 0:
             winningbid = item.bidsilent_set.order_by("amount").last()
             if item.bidsilent_set.filter(user__username=request.user.username).count() > 0:
                 # there is a bid for that user
@@ -295,7 +320,7 @@ def getBidItemForm(request):
                     bidon.append((winningbid.amount, item, BidForm(initial={'amount': winningbid.amount})))
             else:
                 # this means there is a bid for the item, but the current user has not bid on it
-                unbid.append((0, item, BidForm(initial={'amount': 0})))
+                unbid.append((winningbid.amount, item, BidForm(initial={'amount': winningbid.amount})))
         else:
             # there is no bid associated with the item
             unbid.append((0, item, BidForm(initial={'amount': 0})))
@@ -331,40 +356,30 @@ def submit_bid(request):
 @login_required
 def users(request):
     users = AuctionUser.objects.all()
-    form = CreateAccountForm()
-    print(form.fields)
-    form.fields['password1'].widget = forms.HiddenInput()
-    form.initial['password1'] = "ax7!bwaZc"
-    form.fields['password2'].widget = forms.HiddenInput()
-    form.initial['password2'] = "ax7!bwaZc"
+    form = CreateAccountFormHiddenPass()
     if request.method == 'POST':
+        #set password fields
         form_data = request.POST.copy()
         form_data.update(password1="ax7!bwaZc")
         form_data.update(password2="ax7!bwaZc")
-        form = CreateAccountForm(form_data)
-        # print(form.is_valid())
+        #fill form with data
+        form = CreateAccountFormHiddenPass(form_data)
         if form.is_valid():
             #save data
             form.save()
-            users = AuctionUser.objects.all()
-            form = CreateAccountForm()
-            context = {
-                "users": users,
-                "form": form
-            }
-            return render(request, 'users.html', context)
+            return redirect("users")
         else:
+            #invalid post
             context = {
                 "users": users,
                 "form":form}
-            # print(form.cleaned_data)
-            # print(form.errors) #NEED TO PRINT SOME ERRORS TO THE USER SOMEHOW
             return render(request, 'users.html', context)
     else:
         #first visit
         context={"users": users,
                  "form": form}#data to send to the html page goes here
         return render(request, 'users.html', context)
+
 
 @login_required
 def afterLogin(request):
@@ -374,6 +389,7 @@ def afterLogin(request):
         return redirect(home)
     else:
         return redirect(rules)
+
 
 @login_required
 def updateAuctionNumber(request):
@@ -385,6 +401,7 @@ def updateAuctionNumber(request):
     user.auction_number = request.POST['auction_number']
     user.save()
     return redirect(users)
+
 
 #great example of form handling
 def create_account(request):

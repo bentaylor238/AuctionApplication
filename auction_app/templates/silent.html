@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
+{% comment %} <meta http-equiv="refresh" content="10"/> {% endcomment %}
     <h2>Silent auction page</h2>
     {% if user.is_superuser and not published%}
     <h3>Create New Item</h3>
@@ -27,6 +28,13 @@
                 <input type="hidden" name="item_id" value="{{ item.id }}" />
                 <button type="submit">Bid</button>
             </form>
+            {% elif not published and user.is_superuser%}
+                <form action="delete_item" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="type" value="silent">
+                    <input type="hidden" name="pk" value="{{ item.pk }}">
+                    <button type="submit">Delete</button>
+                </form>
             {% endif %}
             </div>
         {% endfor %}
@@ -48,6 +56,13 @@
                 <input type="hidden" name="item_id" value="{{ item.id }}" />
                 <button type="submit">Bid</button>
             </form>
+            {% elif not published and user.is_superuser%}
+                <form action="delete_item" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="type" value="silent">
+                    <input type="hidden" name="pk" value="{{ item.pk }}">
+                    <button type="submit">Delete</button>
+                </form>
             {% endif %}
             </div>
         {% endfor %}
@@ -69,6 +84,13 @@
                 <input type="hidden" name="item_id" value="{{ item.id }}" />
                 <button type="submit">Bid</button>
             </form>
+            {% elif not published and user.is_superuser%}
+                <form action="delete_item" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="type" value="silent">
+                    <input type="hidden" name="pk" value="{{ item.pk }}">
+                    <button type="submit">Delete</button>
+                </form>
             {% endif %}
             </div>
         {% endfor %}

@@ -39,7 +39,7 @@ class Rule(models.Model):
         return self.title
 
 class AuctionUser(AbstractUser):
-    auction_number = models.IntegerField(default=None, blank=True, null=True)
+    auction_number = models.IntegerField( default=None, blank=True, null=True)
     has_paid = models.BooleanField(default=False, blank=True, null=True)
     amount = models.FloatField(default=0)
 
