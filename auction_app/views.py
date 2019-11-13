@@ -405,8 +405,9 @@ def updateAuctionNumber(request):
     username = request.POST['username']
     user = AuctionUser.objects.get(username=username)
     user.auction_number = request.POST['auction_number']
-    user.save()
-    return redirect(users)
+    if user.is_valid():
+        user.save()
+    
 
 
 #great example of form handling
