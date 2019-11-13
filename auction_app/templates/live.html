@@ -2,43 +2,54 @@
 {% block content %}
 
 {% if user.is_superuser and not published %}
-<h3> Create Item </h3>
-<form action="{% url "create_item" %}" method="post">
-    {% csrf_token %}
-    <table>
-        {{createItemForm.as_table}}
-    </table>
-    <input type="hidden" name="type" value="live"></input>
-    <button type="submit">Submit</button>
-</form>
+    <h3> Create Item </h3>
+    <form action="{% url "create_item" %}" method="post">
+        {% csrf_token %}
+        <table>
+            {{createItemForm.as_table}}
+        </table>
+        <input type="hidden" name="type" value="live"></input>
+        <button type="submit">Submit</button>
+    </form>
 {% endif %}
 
 <h3>Current Item: {{currentItem.title}}</h3>
 Description of current Item:{{ currentItem.description}}
 
 {% if published%}
-<form action='sellLiveItem', method="POST">
-    {% csrf_token %}
-    <input type="number" name="auctionNumber" id="winning_user">
-    <label for="winning_user">Auction Number of Winner:</label>
-    <br>
+    <form action='sellLiveItem', method="POST">
+        {% csrf_token %}
+        <input type="number" name="auction_number" id="winning">
+        <label for="winner">Auction Number of Winner:</label>
+        <br>
 
-    <input type="number" name="amount" id="winning_amount">
-    <label for="winning_amount">Winning Amount:</label>
-    <br>
+        <input type="number" name="amount" id="winning_amount">
+        <label for="winning_amount">Winning Amount:</label>
+        <br>
 
-    <input type="hidden" name="pk" value="{{currentItem.pk}}">
-    <button type="submit">Submit Winning Bid</button>
-</form>
+        <input type="hidden" name="pk" value="{{currentItem.pk}}">
+        <button type="submit">Submit Winning Bid</button>
+    </form>
 {% endif %}
 
 <br><br><br>
-<h4>Items on Deck:</h4>
+<h4>All Items:</h4>
 
 {% for item in items %}
-<h5>{{ item.title }}</h5>
-{{ item.description }}
+    <h5>{{ item.title }}</h5>
+    {{ item.description }}
+    <form action='sellLiveItem', method="POST">
+        {% csrf_token %}
+        <input type="number" name="auction_number" id="winner" value="{{ item.user.auction_number }}">
+        <label for="winner">Auction Number of Winner:</label>
+        <br>
+
+        <input type="number" name="amount" id="amount" value="{{ item.amount }}">
+        <label for="winning_amount">Winning Amount:</label>
+        <br>
+
+        <input type="hidden" name="pk" value="{{ item.pk }}">
+        <button type="submit">Update Winning Bid</button>
+    </form>
 {% endfor %}
-
-
 {% endblock %}

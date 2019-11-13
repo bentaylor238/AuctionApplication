@@ -39,9 +39,9 @@ def home(request):
     for bid in userBids:
         if bid.isWinning:
             user.amount+=bid.amount
-    userBids = BidLive.objects.filter(user__id=user.id)
-    for bid in userBids:
-        user.amount+=bid.amount
+    # userBids = BidLive.objects.filter(user__id=user.id)
+    # for bid in userBids:
+    #     user.amount+=bid.amount
     print(user.amount)
     user.save()
     context={"forms":auctionForms,
@@ -61,7 +61,6 @@ def nukeDB():
     Rule.objects.all().delete()
     AuctionUser.objects.all().delete()
     # BidSilent.objects.all().delete()
-    # BidLive.objects.all().delete()
 
 def init_test_db(request):
     if DEBUG:
@@ -121,37 +120,37 @@ def init_test_db(request):
 
 @login_required
 def live(request):
-    #this prevents non admins from getting to this page if its not a published auction
+    # this prevents non admins from getting to this page if its not a published auction
     liveAuction = Auction.objects.filter(type='live').first()
+
+    # perform check to validate proper initialization
     if not liveAuction.published and not request.user.is_superuser:
         return redirect(home)
-
-    createItemForm = LiveItemForm(initial={'auction':liveAuction})
-
+    if len(AuctionUser.objects.filter(auction_number=-1)) == 0: # optimize by initializing in the init function instead of calling it every time
+        defaultUser = AuctionUser(auction_number=-1, has_paid=True, amount=0)
+        defaultUser.save()
     try:
         Auction.objects.get(type='live')
     except Exception as e:
         return HttpResponse("The live auction object does not yet exist. Create a live auction then try again. Django error message is " + str(e))
 
-    try:
-        currentItem = LiveItem.objects.filter(sold='False').order_by('orderInQueue')[0]
-        context = {
-            'currentItem': currentItem,
-            'published': liveAuction.published,
-            'items': LiveItem.objects.all().filter(sold=False).exclude(pk=currentItem.pk),
-            "createItemForm":createItemForm,
-        }
-        return render(request, 'live.html', context)
-    except Exception as e:
-        return HttpResponse("Error (there are probably more than one items in the database with an orderInQueue equal to 1. Here's the full error from django: " + str(e))
+    # functionality
+    createItemForm = LiveItemForm(initial={'auction':liveAuction})
+    currentItem = LiveItem.objects.filter(sold='False').order_by('pk')[0]
+    context = {
+        'currentItem': currentItem,
+        'published': liveAuction.published,
+        'items': LiveItem.objects.all().exclude(pk=currentItem.pk),
+        "createItemForm":createItemForm,
+    }
+    return render(request, 'live.html', context)
+
 
 def sellLiveItem(request):
     soldItem = LiveItem.objects.get(pk=request.POST['pk'])
     try:
-        amount = request.POST['amount']
-        user = AuctionUser.objects.get(auction_number=request.POST['auctionNumber'])
-        bid = BidLive(amount=amount, user=user, item=soldItem)
-        bid.save()
+        soldItem.user=AuctionUser.objects.get(auction_number=request.POST['auction_number'])
+        soldItem.amount = request.POST['amount']
         soldItem.sold = True
         soldItem.save()
         return redirect(live)
@@ -159,7 +158,7 @@ def sellLiveItem(request):
         context = {
             'item': soldItem,
             'error': e,
-            'auctionNumber': request.POST['auctionNumber']
+            'auctionNumber': request.POST['auction_number']
         }
         return render(request, 'liveErrorMessage.html', context)
 
@@ -174,10 +173,10 @@ def payment(request):
             if bid.isWinning:
                 user.amount += bid.amount
                 print(bid.user, bid.amount)
-        bids = BidLive.objects.filter(user__id=user.id)
-        for bid in bids:
-            user.amount += bid.amount
-            print(bid.amount, bid.user, bid.user.amount)
+        # bids = BidLive.objects.filter(user__id=user.id)
+        # for bid in bids:
+        #     user.amount += bid.amount
+        #     print(bid.amount, bid.user, bid.user.amount)
         user.save()
     context={"users": users}#data to send to the html page goes here
     return render(request, 'payment.html', context)

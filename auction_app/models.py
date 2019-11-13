@@ -30,10 +30,6 @@ class Item(models.Model):
 class SilentItem(Item):
     end = models.DateTimeField(default=None, blank=True, null=True)
 
-class LiveItem(Item):
-    sold=models.BooleanField(default=False)
-    orderInQueue = models.IntegerField(default=0)
-
 class Rule(models.Model):
     title = models.CharField(max_length=200)
     last_modified = models.DateTimeField(default=None, blank=True, null=True)
@@ -47,19 +43,13 @@ class AuctionUser(AbstractUser):
     has_paid = models.BooleanField(default=False, blank=True, null=True)
     amount = models.FloatField(default=0)
 
+class LiveItem(Item):
+    user = models.ForeignKey(AuctionUser, on_delete=models.CASCADE)
+    sold = models.BooleanField(default=False)
+    amount = models.FloatField(default=0.00)
+
 class BidSilent(models.Model):
     amount = models.FloatField(default=0)
     item = models.ForeignKey(SilentItem, on_delete=models.CASCADE)
     user = models.ForeignKey(AuctionUser, on_delete=models.CASCADE)
     isWinning = models.BooleanField(default=True)
-
-class BidLive(models.Model):
-    amount = models.FloatField()
-    item = models.ForeignKey(LiveItem, on_delete=models.CASCADE)
-    user = models.ForeignKey(AuctionUser, on_delete=models.CASCADE)
-
-# class SilentAuction(models.Model):
-#     published = models.BooleanField(default=False)
-
-# class LiveAuction(models.Model):
-#     published = models.BooleanField(default=False)
