@@ -1,7 +1,6 @@
 from django.test import TestCase
 from .forms import *
 
-
 # helper function to set up databse
 def init_test_db():
     nukeDB()
