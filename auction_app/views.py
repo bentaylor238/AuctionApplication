@@ -114,7 +114,6 @@ def init_test_db(request):
                 description=randomString(),
                 imageName=randomString(),
                 auction=silentAuction,
-                orderInQueue=i
             )
             itemLive.save()
         return redirect("login")
@@ -155,12 +154,16 @@ def live(request):
 
     # functionality
     createItemForm = LiveItemForm(initial={'auction':liveAuction})
-    currentItem = LiveItem.objects.filter(sold='False').order_by('pk')[0]
+    currentItem = LiveItem.objects.filter(sold='False').order_by('pk').first()
+    if liveAuction.published:
+        items = LiveItem.objects.all().exclude(pk=currentItem.pk)
+    else:
+        items = LiveItem.objects.all()
     context = {
         'currentItem': currentItem,
         'published': liveAuction.published,
-        'items': LiveItem.objects.all().exclude(pk=currentItem.pk),
-        "createItemForm":createItemForm,
+        'items': items,
+        'createItemForm':createItemForm,
     }
     return render(request, 'live.html', context)
 

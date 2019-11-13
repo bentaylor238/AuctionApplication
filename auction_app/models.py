@@ -44,7 +44,7 @@ class AuctionUser(AbstractUser):
     amount = models.FloatField(default=0)
 
 class LiveItem(Item):
-    user = models.ForeignKey(AuctionUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(AuctionUser, on_delete=models.CASCADE, default=None, blank=True, null=True)
     sold = models.BooleanField(default=False)
     amount = models.FloatField(default=0.00)
 
