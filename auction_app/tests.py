@@ -1,6 +1,7 @@
 from django.test import TestCase
-from .forms import *
-
+from django.urls import reverse
+from auction_app.forms import *
+from django.utils import timezone
 
 # helper function to set up databse
 def init_test_db():
@@ -69,3 +70,7 @@ def nukeDB():
 class CreateAccountTest(TestCase):
     def setUp(self):
         init_test_db()
+
+    def test_login_redirect(self):
+        response = self.client.get(reverse('create_item'))
+        self.assertRedirects(response, '/login/?next=/create_item')
