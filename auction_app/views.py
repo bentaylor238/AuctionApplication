@@ -6,7 +6,7 @@ from django.shortcuts import render
 from .models import *
 from .forms import *
 from django.utils import timezone
-from django.http import HttpResponse, JsonResponse, HttpResponseRedirect, HttpResponseNotFound, HttpResponseForbidden
+from django.http import HttpResponse, JsonResponse, HttpResponseRedirect, HttpResponseNotFound, HttpResponseForbidden, HttpResponseServerError
 from django.shortcuts import redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
@@ -121,6 +121,21 @@ def init_test_db(request):
         return redirect("login")
     else:
         return HttpResponseNotFound()
+
+@login_required
+def delete_item(request):
+    if request.method == "POST" and request.user.is_superuser:
+        auctionType = request.POST.get('type', "")
+        pk = request.POST.get('pk',None)
+        if auctionType == "silent":
+            items = SilentItem.objects
+        elif auctionType == "live":
+            items = LiveItem.objects
+        else:
+            return HttpResponseServerError()
+        items.get(pk=pk).delete()
+        return redirect(auctionType)
+    return HttpResponseNotFound()
 
 
 @login_required
