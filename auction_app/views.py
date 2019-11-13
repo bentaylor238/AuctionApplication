@@ -103,7 +103,6 @@ def init_test_db(request):
             item = SilentItem(
                 title=randomString(), 
                 description=randomString(), 
-                imageName=randomString(), 
                 auction=silentAuction
             )
             item.save()
@@ -113,7 +112,6 @@ def init_test_db(request):
             itemLive = LiveItem(
                 title=randomString(),
                 description=randomString(),
-                imageName=randomString(),
                 auction=silentAuction,
                 orderInQueue=i
             )
@@ -267,9 +265,9 @@ def create_item(request):
                 request.POST['end'] = datetime.datetime.strptime(request.POST['end'], '%Y-%m-%dT%H:%M')
             else:
                 request.POST['end'] = None
-            item = SilentItemForm(request.POST)
+            item = SilentItemForm(request.POST, request.FILES)
         elif auctionType == 'live':
-            item = LiveItemForm(request.POST)
+            item = LiveItemForm(request.POST, request.FILES)
 
         #check if valid before saving
         if item.is_valid():
@@ -281,6 +279,7 @@ def create_item(request):
             return redirect(silent) 
         elif auctionType == 'live':
             return redirect(live)
+
     else:
         #not authorized to make request
         return HttpResponseForbidden()

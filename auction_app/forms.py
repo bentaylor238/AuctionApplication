@@ -36,7 +36,7 @@ class AuctionForm(forms.ModelForm):
 class SilentItemForm(forms.ModelForm):
     class Meta:
         model = SilentItem
-        fields = ('title','description','imageName','end','auction')
+        fields = ('title','description','image','end','auction')
         widgets = { 
             'end': forms.DateTimeInput(
                 attrs={'type':'datetime-local'}, 
@@ -48,7 +48,7 @@ class SilentItemForm(forms.ModelForm):
 class LiveItemForm(forms.ModelForm):
     class Meta:
         model = LiveItem
-        fields = ('title','description','imageName','auction')
+        fields = ('title','description','image','auction')
         widgets ={
             'auction':forms.HiddenInput()
         }

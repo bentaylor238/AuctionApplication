@@ -10,4 +10,5 @@ __pycache__
 *.csv
 *.zip
 *.bak
+media/
 auction_app/migrations
