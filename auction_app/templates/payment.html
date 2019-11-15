@@ -18,7 +18,7 @@
                     <td>{{ user.email }}</td>
                     <td>{{ user.username }}</td>
                     <td>{{ user.auction_number }}</td>
-                    <td>{{ user.amount }}</td>
+                    <td>Bids/Winnings So Far: ${{ user.amount }}</td>
                     <td>
                         <form method="post" action="updateUserPayment">
                             {% csrf_token %}

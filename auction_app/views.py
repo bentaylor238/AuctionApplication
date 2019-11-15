@@ -108,6 +108,8 @@ def init_test_db(request):
             item.save()
             user = AuctionUser.objects.all().first()
             user.save()
+            new_bid = BidSilent(item=item, amount=12.00, user=AuctionUser.objects.get(auction_number=20))
+            new_bid.save()
             # populated the live database too
             itemLive = LiveItem(
                 title=randomString(),
@@ -115,6 +117,9 @@ def init_test_db(request):
                 imageName=randomString(),
                 auction=silentAuction,
             )
+            itemLive.user = AuctionUser.objects.get(auction_number=10)
+            itemLive.amount = 10.00
+            itemLive.sold = True
             itemLive.save()
         return redirect("login")
     else:
