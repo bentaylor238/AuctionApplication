@@ -155,5 +155,4 @@ def nukeDB():
     LiveItem.objects.all().delete()
     Rule.objects.all().delete()
     AuctionUser.objects.all().delete()
-    # BidSilent.objects.all().delete()
-    # BidLive.objects.all().delete()
+    BidSilent.objects.all().delete()
