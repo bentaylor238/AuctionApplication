@@ -1,16 +1,29 @@
 from django.test import TestCase
 from django.urls import reverse
-# from django.test import Client
 
-# from auction_app.models import *
-# from .forms import *
-# from django.utils import timezone
 from auction_app.models import AuctionUser
+from auction_app.views import *
+from django.test.utils import setup_test_environment
 from auction_app.views import *
 
 class CreateAccountTest(TestCase):
     def setUp(self):
         init_test_db()
+
+
+class SilentTest(TestCase):
+    def setUp(self):
+        init_test_db()
+
+    # def testPage(self):
+    #     login = self.client.login(username='user1', password='letmepass')
+    #     self.assertTrue(login)
+    #     response = self.client.get(reverse('silent'))
+    #     self.assertIsNotNone(response.context)
+    #     print('#####', type(response.context))
+
+    def setDown(self):
+        nukeDB()
 
 # Create your tests here.
 class UsersViewTest(TestCase):
@@ -18,12 +31,12 @@ class UsersViewTest(TestCase):
         init_test_db()
 
     def test_view_url_exists_at_desired_location(self):
-        login = self.client.login(username='user1', password='letmepass')
+        login = self.client.login(username='admin', password='letmepass')
         print(login)
-        # response = self.client.get(reverse('users'))
-        # print(response)
-        # self.assertEqual(str(response.context['user']), 'admin')
-        # self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse('users'))
+        print(response)
+        self.assertEqual(str(response.context['user']), 'admin')
+        self.assertEqual(response.status_code, 200)
 
     def test_redirect_if_not_logged_in(self):
         response = self.client.get(reverse('users'))
@@ -33,6 +46,7 @@ class UsersViewTest(TestCase):
     def test_one_plus_one_equals_two(self):
         print("Method: test_one_plus_one_equals_two.")
         self.assertEqual(1 + 1, 2)
+
 
 # helper function to set up databse
 def init_test_db():
