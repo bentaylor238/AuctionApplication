@@ -1,5 +1,9 @@
 from django.test import TestCase
-from .forms import *
+from django.urls import reverse
+from auction_app.views import *
+from django.test.utils import setup_test_environment
+# import django
+# django.test.utils.setup_test_environment()
 
 # helper function to set up databse
 def init_test_db():
@@ -50,7 +54,6 @@ def init_test_db():
             description=randomString(),
             imageName=randomString(),
             auction=silentAuction,
-            orderInQueue=i
         )
         itemLive.save()
 
@@ -62,6 +65,21 @@ def nukeDB():
     AuctionUser.objects.all().delete()
     # BidSilent.objects.all().delete()
     # BidLive.objects.all().delete()
+
+
+class SilentTest(TestCase):
+    def setUp(self):
+        init_test_db()
+
+    def testPage(self):
+        login = self.client.login(username='user1', password='letmepass')
+        self.assertTrue(login)
+        response = self.client.get(reverse('silent'))
+        self.assertIsNotNone(response.context)
+        print('#####', type(response.context))
+
+    def setDown(self):
+        nukeDB()
 
 
 
