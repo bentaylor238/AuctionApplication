@@ -67,9 +67,9 @@ class UsersViewTest(TestCase):
 
     def test_view_url_exists_at_desired_location(self):
         login = self.client.login(username='admin', password='letmepass')
-        print(login)
+        # print(login)
         response = self.client.get(reverse('users'))
-        print(response)
+        # print(response)
         self.assertEqual(str(response.context['user']), 'admin')
         self.assertEqual(response.status_code, 200)
 
@@ -88,7 +88,7 @@ class UsersViewTest(TestCase):
         self.assertRedirects(response, '/home/?next=/users')
 
     def test_one_plus_one_equals_two(self):
-        print("Method: test_one_plus_one_equals_two.")
+        # print("Method: test_one_plus_one_equals_two.")
         self.assertEqual(1 + 1, 2)
 
 

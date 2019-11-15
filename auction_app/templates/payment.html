@@ -22,15 +22,27 @@
                     <td>
                         <form method="post" action="updateUserPayment">
                             {% csrf_token %}
-                            <input type="hidden" name="username" value="{{ user.username }}">
-                            {% if user.has_paid %}
-                                <input type="checkbox" name="paid" value="checked" checked>
-                            {% else %}
-                                <input type="checkbox" name="paid" value="checked">
-                            {% endif %}
-                            <button type="submit">Update Payment</button>
+                            <table>
+                                <tr>
+                                    <td>
+                                        <input type="hidden" name="username" value="{{ user.username }}">
+                                        {% if user.has_paid %}
+                                            <input type="checkbox" name="paid" value="checked" checked>
+                                        {% else %}
+                                            <input type="checkbox" name="paid" value="checked">
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button type="submit">Update Payment</button>
+                                    </td>
+                                </tr>
+                            </table>
                         </form>
                     </td>
+                    <td>Items Won:</td>
+                    {% for item in user.items %}
+                        <td>{{ item.title }}</td>
+                    {% endfor %}
                 </tr>
             {% endfor %}
         {% else %}

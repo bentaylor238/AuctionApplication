@@ -23,6 +23,7 @@
                 </form> <br>
                 {% endfor %}
             </table>
+            <p>Total Auction Winnings: ${{ totalWinnings }}</p>
         {% else %}
             <h3> Home Page </h3>
             <a href="{% url "rules" %}"> rules</a> <br>
@@ -34,6 +35,14 @@
             {% endif %}
             <label>Total Amount Bid: </label>
             <p>{{ user.amount }}</p>
+            <label>Items Won</label>
+            <table>
+                <tr>
+                    {% for item in user.items %}
+                        <td>{{ item.title }}</td>
+                    {% endfor %}
+                </tr>
+            </table>
         {% endif %}
     {% endif %}
 {% endblock %}
