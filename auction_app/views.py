@@ -76,7 +76,7 @@ def nukeDB():
     LiveItem.objects.all().delete()
     Rule.objects.all().delete()
     AuctionUser.objects.all().delete()
-    # BidSilent.objects.all().delete()
+    BidSilent.objects.all().delete()
 
 
 def init_test_db(request):
