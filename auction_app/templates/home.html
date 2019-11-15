@@ -43,6 +43,14 @@
                     {% endfor %}
                 </tr>
             </table>
+            <label>Items with Winning Bids</label>
+            <table>
+                <tr>
+                    {% for item in user.winningItems %}
+                        <td>{{ item.title }}</td>
+                    {% endfor %}
+                </tr>
+            </table>
         {% endif %}
     {% endif %}
 {% endblock %}

@@ -36,10 +36,12 @@ def home(request):
     user = request.user
     user.amount = 0
     user.items = []
+    user.winningItems = []
     userBids = BidSilent.objects.filter(user__id=user.id)
     for bid in userBids:
         if bid.isWinning:
             user.amount+=bid.amount
+            user.winningItems.append(bid.item)
     liveItems = LiveItem.objects.filter(user__id=user.id)
     for item in liveItems:
         user.amount+=item.amount
