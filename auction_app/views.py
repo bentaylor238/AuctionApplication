@@ -35,17 +35,31 @@ def home(request):
 
     user = request.user
     user.amount = 0
+    user.items = []
     userBids = BidSilent.objects.filter(user__id=user.id)
     for bid in userBids:
         if bid.isWinning:
             user.amount+=bid.amount
-    # userBids = BidLive.objects.filter(user__id=user.id)
-    # for bid in userBids:
-    #     user.amount+=bid.amount
+    liveItems = LiveItem.objects.filter(user__id=user.id)
+    for item in liveItems:
+        user.amount+=item.amount
+        user.items.append(item)
     print(user.amount)
     user.save()
+
+    auctionTotalWinnings = 0
+    silentItemBids = BidSilent.objects.all()
+    for bid in silentItemBids:
+        if bid.isWinning:
+            auctionTotalWinnings += bid.amount
+
+    liveItems = LiveItem.objects.all()
+    for item in liveItems:
+        if item.sold:
+            auctionTotalWinnings+=item.amount
     context={"forms":auctionForms,
-             "user": user} #data to send to the html page goes here
+             "user": user,
+             "totalWinnings": auctionTotalWinnings} #data to send to the html page goes here
     return render(request, 'home.html', context)
 
 
@@ -108,6 +122,8 @@ def init_test_db(request):
             item.save()
             user = AuctionUser.objects.all().first()
             user.save()
+            new_bid = BidSilent(item=item, amount=12.00, user=AuctionUser.objects.get(auction_number=20))
+            new_bid.save()
             # populated the live database too
             itemLive = LiveItem(
                 title=randomString(),
@@ -115,6 +131,9 @@ def init_test_db(request):
                 imageName=randomString(),
                 auction=silentAuction,
             )
+            itemLive.user = AuctionUser.objects.get(auction_number=10)
+            itemLive.amount = 10.00
+            itemLive.sold = True
             itemLive.save()
         return redirect("login")
     else:
@@ -191,18 +210,20 @@ def payment(request):
     users = AuctionUser.objects.all()
     for user in users:
         user.amount = 0.0
+        user.items = []
         # for silent
         bids = BidSilent.objects.filter(user__id=user.id)
         for bid in bids:
             if bid.isWinning:
                 user.amount += bid.amount
-                print(bid.user, bid.amount)
+                # print(bid.user, bid.amount)
 
         # for live
         items = LiveItem.objects.filter(user__id=user.id)
         for item in items:
             user.amount += item.amount
-            print(item.amount, item.user)
+            user.items.append(item)
+            # print(item.amount, item.user)
         user.save()
     context={"users": users}#data to send to the html page goes here
     return render(request, 'payment.html', context)
@@ -355,7 +376,7 @@ def submit_bid(request):
                         new_bid.save()
                 else:
                     # this means there were no bids, create a new one
-                    new_bid = BidSilent(item=currentitem, amount=amount, user=AuctionUser.objects.get(username=request.user.username))
+                    new_bid = BidSilent(item=currentitem, amount=amount, user=AuctionUser.objects.get(username=request.user.username), isWinning=True)
                     new_bid.save()
             else:
                 # this means invalid data was posted
