@@ -346,7 +346,12 @@ def submit_bid(request):
                 currentitem = SilentItem.objects.get(id=id)
                 if currentitem.bidsilent_set.count() > 0:
                     if float(amount) > currentitem.bidsilent_set.order_by("amount").last().amount:
-                        new_bid = BidSilent(item=currentitem, amount=amount, user=AuctionUser.objects.get(username=request.user.username))
+                        # make the new bid the winning bid and the last bid notwinning
+                        oldbid = currentitem.bidsilent_set.order_by("amount").last()
+                        oldbid.isWinning = False
+                        oldbid.save()
+                        print('&&&&&', type(oldbid))
+                        new_bid = BidSilent(item=currentitem, amount=amount, user=AuctionUser.objects.get(username=request.user.username), isWinning=True)
                         new_bid.save()
                 else:
                     # this means there were no bids, create a new one
