@@ -186,7 +186,6 @@ def live(request):
     return render(request, 'live.html', context)
 
 
-
 def sellLiveItem(request):
     soldItem = LiveItem.objects.get(pk=request.POST['pk'])
     try:

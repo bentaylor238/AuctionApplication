@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
+    <div class="col-md">
     {% if user.is_superuser %}
         <h3> Admin Home Page </h3>
     {% else %}
@@ -36,4 +37,5 @@
             {% endfor %}
         </table>
     {% endif %}
+    </div>
 {% endblock %}

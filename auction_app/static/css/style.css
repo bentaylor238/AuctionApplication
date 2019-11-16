@@ -8,6 +8,12 @@
     flex-direction: row;
 }
 
+.flex-column{
+    display: flex;
+    flex-direction: column;
+}
+
+
 header{
     margin-top: .5em;
     margin-bottom: 1em;
@@ -17,4 +23,12 @@ header{
     margin-top: 0;
     margin-bottom: 0;
     margin-right: .5em;
+}
+
+.greenBackground{
+    background-color: #adfcad;
+}
+
+.yellowBackground{
+    background-color: #ffff99;
 }
