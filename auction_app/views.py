@@ -14,7 +14,8 @@ from django.urls import reverse_lazy
 from django.views import generic
 from django.contrib.auth.decorators import login_required
 from .debug_settings import *
-
+from django.contrib import messages
+from django.core.exceptions import ValidationError
 
 @login_required
 def home(request):
@@ -183,7 +184,6 @@ def live(request):
         'createItemForm':createItemForm,
     }
     return render(request, 'live.html', context)
-
 
 
 def sellLiveItem(request):
@@ -461,8 +461,12 @@ def updateAuctionNumber(request):
     username = request.POST['username']
     user = AuctionUser.objects.get(username=username)
     user.auction_number = request.POST['auction_number']
-    if user.is_valid():
+    try: 
+        user.full_clean()
         user.save()
+    except ValidationError:
+        messages.error(request, "Auction Number Invalid")
+    return redirect("users")
     
 
 #great example of form handling
