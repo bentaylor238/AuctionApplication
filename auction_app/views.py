@@ -156,7 +156,7 @@ def delete_item(request):
 
 @login_required
 def live(request):
-    # this prevents non admins from getting to this page if its not a published auction
+    # this prevents non admins from getting to this page if it's not a published auction
     liveAuction = Auction.objects.filter(type='live').first()
 
     # perform check to validate proper initialization
