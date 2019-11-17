@@ -1,8 +1,8 @@
 from django.test import TestCase
 from django.urls import reverse
-
+from auction_app.forms import *
+from django.utils import timezone
 from auction_app.models import AuctionUser
-from auction_app.views import *
 from django.test.utils import setup_test_environment
 from auction_app.views import *
 
@@ -129,7 +129,6 @@ def init_test_db():
         item = SilentItem(
             title=randomString(),
             description=randomString(),
-            imageName=randomString(),
             auction=silentAuction
         )
         item.save()
@@ -141,7 +140,6 @@ def init_test_db():
         itemLive = LiveItem(
             title=randomString(),
             description=randomString(),
-            imageName=randomString(),
             auction=silentAuction,
         )
         itemLive.user=AuctionUser.objects.get(auction_number=10)
@@ -156,3 +154,19 @@ def nukeDB():
     Rule.objects.all().delete()
     AuctionUser.objects.all().delete()
     BidSilent.objects.all().delete()
+    # BidLive.objects.all().delete()
+
+
+
+class CreateAccountTest(TestCase):
+    def setUp(self):
+        init_test_db()
+
+    def test_login_redirect(self):
+        response = self.client.get(reverse('create_item'))
+        self.assertRedirects(response, '/login/?next=/create_item')
+
+    def test_login(self):
+        print(AuctionUser.objects.get(username="user1"))
+        loggedIn = self.client.login(username="admin", password="letmepass")
+        print(loggedIn)

@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm, PasswordChangeForm
 from .models import Rule, AuctionUser, Auction, SilentItem, LiveItem
 class RulesForm(forms.ModelForm):
     class Meta:
@@ -36,7 +36,7 @@ class AuctionForm(forms.ModelForm):
 class SilentItemForm(forms.ModelForm):
     class Meta:
         model = SilentItem
-        fields = ('title','description','imageName','end','auction')
+        fields = ('title','description','image','end','auction')
         widgets = { 
             'end': forms.DateTimeInput(
                 attrs={'type':'datetime-local'}, 
@@ -48,10 +48,24 @@ class SilentItemForm(forms.ModelForm):
 class LiveItemForm(forms.ModelForm):
     class Meta:
         model = LiveItem
-        fields = ('title','description','imageName','auction')
+        fields = ('title','description','image','auction')
         widgets ={
             'auction':forms.HiddenInput()
         }
+
+class ChangePasswordForm(forms.Form):
+    password1 = forms.CharField(widget=forms.PasswordInput())
+    password2 = forms.CharField(widget=forms.PasswordInput())
+    user = forms.ModelChoiceField(queryset=AuctionUser.objects.all(), empty_label="Select A User")
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password1 = self.cleaned_data.get('password1')
+        password2 = self.cleaned_data.get('password2')
+        if password1 and password2:
+            if password1 != password2:
+                raise forms.ValidationError("Passwords do not match")
+            return cleaned_data
 
 #SAVED FOR AN EXAMPLE, NOT USED
 # class CreateAccount(forms.Form):

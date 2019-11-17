@@ -1,48 +1,39 @@
 {% extends 'base.html' %}
 {% block content %}
-    {% if user.is_authenticated %}
-        {% if user.is_superuser %}
-            <h3> Admin Home Page </h3> 
-            <a href="{% url "rules" %}"> rules</a> <br>
-            <a href="{% url "live" %}"/> live auction</a> <br>
-            <a href="{% url "silent" %}"/> silent auction</a> <br>
-            <a href="{% url "users" %}"/> users</a> <br>
-            <a href="{% url "payment" %}"/> payment</a> <br>
-            <table>
-                {% for form in forms%}
-                <form action="home" method="post">
-                    {% csrf_token %}
-                    <span> {{ form.type.value }} Auction</span>
-                    {{form.published.as_hidden}}
-                    {{form.type.as_hidden}}
-                    {% if form.published.value %}
-                        <button type="submit">Hide</button>
-                    {% else %}
-                        <button type="submit">Publish</button>
-                    {% endif %}
-                </form> <br>
-                {% endfor %}
-            </table>
-            <p>Total Auction Winnings: ${{ totalWinnings }}</p>
-        {% else %}
-            <h3> Home Page </h3>
-            <a href="{% url "rules" %}"> rules</a> <br>
-            {% if forms.0.published.value %}
-                <a href="{% url "silent" %}"/> silent auction</a> <br>
-            {% endif %}
-            {% if forms.1.published.value %}
-                <a href="{% url "live" %}"/> live auction</a> <br>
-            {% endif %}
-            <label>Total Amount Bid: </label>
-            <p>{{ user.amount }}</p>
-            <label>Items Won</label>
-            <table>
-                <tr>
-                    {% for item in user.items %}
-                        <td>{{ item.title }}</td>
-                    {% endfor %}
-                </tr>
-            </table>
-        {% endif %}
+    {% if user.is_superuser %}
+        <h3> Admin Home Page </h3>
+    {% else %}
+        <h3> Home Page </h3>
+    {% endif %}
+        <a href="{% url "rules" %}"> rules</a> <br>
+    {% if user.is_superuser or forms.0.published.value%}
+        <a href="{% url "silent" %}"/> silent auction</a> <br>
+    {% endif %}
+    {% if user.is_superuser or forms.1.published.value%}
+        <a href="{% url "live" %}"/> live auction</a> <br>
+    {% endif %}
+    {% if user.is_superuser%}
+        <a href="{% url "users" %}"/> users</a> <br>
+        <a href="{% url "payment" %}"/> payment</a> <br>
+    {% endif %}
+    {% if not user.is_superuser%}
+        <label>Total Amount Bid: </label>
+        <p>{{ user.amount }}</p>
+    {% endif %}
+    {% if user.is_superuser %}
+        <table>
+            {% for form in forms%}
+            <form action="home" method="post">
+                {% csrf_token %}
+                {{form.published.as_hidden}}
+                {{form.type.as_hidden}}
+                {% if form.published.value %}
+                    <button type="submit"> Hide {{ form.type.value }}</button>
+                {% else %}
+                    <button type="submit"> Publish {{ form.type.value }}</button>
+                {% endif %}
+            </form> <br>
+            {% endfor %}
+        </table>
     {% endif %}
 {% endblock %}
