@@ -97,9 +97,9 @@ class LiveAuction(TestCase):
 
     def test_numberOfItems(self):
             login = self.client.login(username='user1', password='letmepass')
-        
-
-
+            self.assertTrue(login)
+            response = self.client.get(reverse('live'))
+            self.assertEqual(response.status_code, 200)
 
 # helper function to set up database
 def init_test_db():
