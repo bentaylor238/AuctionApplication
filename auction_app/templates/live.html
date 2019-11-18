@@ -12,7 +12,6 @@
     </form>
 {% endif %}
 
-{% if published and user.is_superuser %}
 <div class="flex-column">
     <div style="margin:auto;"><h4>Current Item:</h4></div>
     <div class="card" style="width: 40em; margin:auto; margin-top:1em;">
@@ -46,12 +45,11 @@
         </div>
     </div>
 </div>
-{% endif %}
 
 <hr><br>
 
 <div class="flex-column"> 
-<div style="margin:auto;"><h4>All Items:</h4></div>
+<div style="margin:auto;"><h4>Upcoming Items:</h4></div>
     {% for item in items %}
         <div class="card" style="width: 30em; margin:auto; margin-top:1em;">
             <div class="card-header"><h2>{{ item.title }}</h2> </div>

@@ -19,6 +19,26 @@ from django.core.exceptions import ValidationError
 
 @login_required
 def home(request):
+    # get general data to display to admin
+    silentBids = BidSilent.objects.all()
+    liveItems = LiveItem.objects.all()
+    silentCount = SilentItem.objects.all().count()
+    liveCount = liveItems.count()
+    totalUsers = AuctionUser.objects.all().count()
+    totalEarned = 0
+    for bid in silentBids:
+        if bid.isWinning:
+            totalEarned += bid.amount
+    for item in liveItems:
+        if item.sold:
+            totalEarned += item.amount
+    dashboard = {
+        "silentCount": silentCount,
+        "liveCount": liveCount,
+        "totalUsers": totalUsers,
+        "totalEarned": totalEarned,
+    }
+
     if request.method == "POST":
         # for key in request.POST:
         #     print(f"\t{key} => {request.POST[key]}")
@@ -48,19 +68,9 @@ def home(request):
     print(user.amount)
     user.save()
 
-    auctionTotalWinnings = 0
-    silentItemBids = BidSilent.objects.all()
-    for bid in silentItemBids:
-        if bid.isWinning:
-            auctionTotalWinnings += bid.amount
-
-    liveItems = LiveItem.objects.all()
-    for item in liveItems:
-        if item.sold:
-            auctionTotalWinnings+=item.amount
     context={"forms":auctionForms,
              "user": user,
-             "totalWinnings": auctionTotalWinnings} #data to send to the html page goes here
+             "dashboard": dashboard} #data to send to the html page goes here
     return render(request, 'home.html', context)
 
 
@@ -387,6 +397,19 @@ def submit_bid(request):
 
     return HttpResponseRedirect("/silent")
 
+
+@login_required
+def updateSuperUser(request):
+    if request.user.is_superuser and request.method=="POST":
+        username = request.POST.get("username", False)
+        try: 
+            if username:
+                user = AuctionUser.objects.get(username=username)
+                user.is_superuser = not user.is_superuser
+                user.save()
+        except ValidationError:
+            messages.error(request, "Unable to update user.")
+    return redirect("users")
 
 @login_required
 def users(request):
