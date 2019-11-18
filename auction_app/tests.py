@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, Client
 from django.urls import reverse
 from auction_app.forms import *
 from django.utils import timezone
@@ -99,6 +99,7 @@ class LiveAuction(TestCase):
         self.assertTrue(self.client.login(username='admin', password='letmepass'))
         response = self.client.get(reverse('live'))
         self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('live.html')
 
     def test_Non_published_context(self):
         self.assertTrue(self.client.login(username='admin', password='letmepass'))
@@ -108,9 +109,7 @@ class LiveAuction(TestCase):
         self.assertEqual(response.context['currentItem'].title, LiveItem.objects.filter(sold=False).order_by('pk').first().title)
 
     def test_published_context(self):
-        liveAuction = Auction.objects.get(type='live')
-        liveAuction.published = True
-        liveAuction.save()
+        self.publishAuction()
         self.assertTrue(self.client.login(username='admin', password='letmepass'))
         response = self.client.get(reverse('live'))
         self.assertEqual(response.context['published'], True)
@@ -118,11 +117,31 @@ class LiveAuction(TestCase):
         self.assertEqual(response.context['currentItem'].title, LiveItem.objects.filter(sold=False).order_by('pk').first().title)
 
     def test_placeBid(self):
+        self.publishAuction()
+        self.assertTrue(self.client.login(username='admin', password='letmepass'))
+        response = self.client.get(reverse('live'))
+        c = Client()
+        postAttempt = c.post(reverse('sellLiveItem'), {'auction_number': 20, 'pk': response.context['currentItem'].pk, 'amount': 30})
+        self.assertEqual(postAttempt.status_code, 302)
+
+        # dog = self.client.get(reverse('live'))
+        # self.assertEqual(len(dog.context['items']), 8)
+
+
+        '''
+        auction_number
+        pk
+        amount
+        '''
+
+
+
+
+    def publishAuction(self):
         liveAuction = Auction.objects.get(type='live')
         liveAuction.published = True
         liveAuction.save()
-        self.assertTrue(self.client.login(username='admin', password='letmepass'))
-        self.client.get('live/')
+
 # class CreateAccountTest(TestCase):
 #     def setUp(self):
 #         init_test_db()
