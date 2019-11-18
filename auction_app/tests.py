@@ -20,7 +20,7 @@ class SilentTest(TestCase):
         self.assertTrue(login)
         response = self.client.get(reverse('silent'))
         self.assertIsNotNone(response.context)
-        print('#####', type(response.context))
+
 
     def setDown(self):
         nukeDB()
@@ -177,7 +177,7 @@ def init_test_db():
             rules_content="Insert rules here",
             announcements_content="Insert announcements here"
     ).save()
-    silentAuction = Auction(type="silent")
+    silentAuction = Auction(type="silent", published=True)
     silentAuction.save()
     liveAuction = Auction(type="live")
     liveAuction.save()
@@ -190,7 +190,9 @@ def init_test_db():
         item.save()
         user = AuctionUser.objects.all().first()
         user.save()
-        new_bid = BidSilent(item=item, amount=12.00, user=AuctionUser.objects.get(auction_number=20))
+        new_bid = BidSilent(item=item, amount=12.00, user=AuctionUser.objects.get(auction_number=20), isWinning=True)
+        new_bid.save()
+        new_bid = BidSilent(item=item, amount=11.00, user=AuctionUser.objects.get(auction_number=20), isWinning=False)
         new_bid.save()
         itemLive = LiveItem(
             title=randomString(),

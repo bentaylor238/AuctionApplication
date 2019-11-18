@@ -372,7 +372,6 @@ def submit_bid(request):
                         oldbid = currentitem.bidsilent_set.order_by("amount").last()
                         oldbid.isWinning = False
                         oldbid.save()
-                        print('&&&&&', type(oldbid))
                         new_bid = BidSilent(item=currentitem, amount=amount, user=AuctionUser.objects.get(username=request.user.username), isWinning=True)
                         new_bid.save()
                 else:
