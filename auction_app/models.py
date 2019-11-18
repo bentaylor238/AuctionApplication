@@ -21,7 +21,7 @@ class Item(models.Model):
     title = models.CharField(max_length=200, default='')
     description = models.CharField(max_length=200, default='')
     date = models.DateTimeField(datetime.datetime.now(), default=datetime.datetime.now(), blank=True, null=True)
-    imageName = models.CharField(max_length=50, default='')
+    image = models.ImageField(upload_to='images/', default='images/default.jpg')
     auction = models.ForeignKey(Auction, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -39,7 +39,7 @@ class Rule(models.Model):
         return self.title
 
 class AuctionUser(AbstractUser):
-    auction_number = models.IntegerField( default=None, blank=True, null=True)
+    auction_number = models.IntegerField(unique=True, default=None, blank=True, null=True)
     has_paid = models.BooleanField(default=False, blank=True, null=True)
     amount = models.FloatField(default=0)
 

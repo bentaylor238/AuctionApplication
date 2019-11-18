@@ -13,51 +13,76 @@
 {% endif %}
 
 {% if published and user.is_superuser %}
-<h3>Current Item: {{currentItem.title}}</h3>
-Description of current Item:{{ currentItem.description}}
-    <form action='sellLiveItem', method="POST">
-        {% csrf_token %}
-        <input type="number" name="auction_number" id="winning">
-        <label for="winner">Auction Number of Winner:</label>
-        <br>
-
-        <input type="number" name="amount" id="winning_amount">
-        <label for="winning_amount">Winning Amount:</label>
-        <br>
-
-        <input type="hidden" name="pk" value="{{currentItem.pk}}">
-        <button type="submit">Submit Winning Bid</button>
-    </form>
-{% endif %}
-<hr>
-<br><br><br>
-<h4>All Items:</h4>
-    {% for item in items %}
-        <h5>{{ item.title }}</h5>
-        {{ item.description }}
-
-        {% if published and user.is_superuser %}
-            <form action='sellLiveItem', method="POST">
-            {% csrf_token %}
-            <input type="number" name="auction_number" id="winner" value="{{ item.user.auction_number }}">
-            <label for="winner">Auction Number of Winner:</label>
-            <br>
-
-            <input type="number" name="amount" id="amount" value="{{ item.amount }}">
-            <label for="winning_amount">Winning Amount:</label>
-            <br>
-
-            <input type="hidden" name="pk" value="{{ item.pk }}">
-            <button type="submit">Update Winning Bid</button>
-        </form>
-        {% endif %}
-        {% if not published and user.is_superuser %}
+<div class="flex-column">
+    <div style="margin:auto;"><h4>Current Item:</h4></div>
+    <div class="card" style="width: 40em; margin:auto; margin-top:1em;">
+        <div class="card-header greenBackground"><h2>{{ currentItem.title }}</h2> </div>
+        <div class="card-body">
+            <img src="{{ currentItem.image.url }}" class="card-img-top" alt="image"></img>
+            <p>{{ currentItem.description }}</p>
+            {% if not published and user.is_superuser %}
             <form action="delete_item" method="post">
                 {% csrf_token %}
                 <input type="hidden" name="type" value="live">
-                <input type="hidden" name="pk" value="{{ item.pk }}">
+                <input type="hidden" name="pk" value="{{ currentItem.pk }}">
                 <button type="submit">Delete</button>
             </form>
-        {% endif %}
+            {% endif %}
+            {% if published and user.is_superuser %}
+                <form action='sellLiveItem', method="POST">
+                    {% csrf_token %}
+                    <input type="number" name="auction_number" id="winner" value="{{ currentItem.user.auction_number }}">
+                    <label for="winner">Auction Number of Winner:</label>
+                    <br>
+
+                    <input type="number" name="amount" id="amount" value="{{ currentItem.amount }}">
+                    <label for="winning_amount">Winning Amount:</label>
+                    <br>
+
+                    <input type="hidden" name="pk" value="{{ currentItem.pk }}">
+                    <button type="submit">Update Winning Bid</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<hr><br>
+
+<div class="flex-column"> 
+<div style="margin:auto;"><h4>All Items:</h4></div>
+    {% for item in items %}
+        <div class="card" style="width: 30em; margin:auto; margin-top:1em;">
+            <div class="card-header"><h2>{{ item.title }}</h2> </div>
+            <div class="card-body">
+                <img src="{{ item.image.url }}" class="card-img-top" alt="image"></img>
+                <p>{{ item.description }}</p>
+                {% if not published and user.is_superuser %}
+                <form action="delete_item" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="type" value="live">
+                    <input type="hidden" name="pk" value="{{ item.pk }}">
+                    <button type="submit">Delete</button>
+                </form>
+                {% endif %}
+                {% if published and user.is_superuser %}
+                    <form action='sellLiveItem', method="POST">
+                        {% csrf_token %}
+                        <input type="number" name="auction_number" id="winner" value="{{ item.user.auction_number }}">
+                        <label for="winner">Auction Number of Winner:</label>
+                        <br>
+
+                        <input type="number" name="amount" id="amount" value="{{ item.amount }}">
+                        <label for="winning_amount">Winning Amount:</label>
+                        <br>
+
+                        <input type="hidden" name="pk" value="{{ item.pk }}">
+                        <button type="submit">Update Winning Bid</button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
     {% endfor %}
+</div>
 {% endblock %}

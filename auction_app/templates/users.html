@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
-    <table>
+    <table class="table">
         {% if users %}
         <tr>
             <td>First Name</td>
@@ -37,6 +37,15 @@
         <table>
             {{form.as_table}}
         </table>
+        <input type="hidden" name="create_account" value="True">
         <button type="submit">Create User</button>
+    </form>
+    <form method="post" action="users">
+        {% csrf_token %}
+        <table>
+            {{change_password_form.as_table}}
+        </table>
+        <input type="hidden" name="change_password" value="True">
+        <button type="submit">Change Password</button>
     </form>
 {% endblock %}

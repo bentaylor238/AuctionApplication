@@ -1,8 +1,8 @@
-from django.test import TestCase
+from django.test import TestCase, Client
 from django.urls import reverse
-
+from auction_app.forms import *
+from django.utils import timezone
 from auction_app.models import AuctionUser
-from auction_app.views import *
 from django.test.utils import setup_test_environment
 from auction_app.views import *
 
@@ -91,8 +91,64 @@ class UsersViewTest(TestCase):
         # print("Method: test_one_plus_one_equals_two.")
         self.assertEqual(1 + 1, 2)
 
+class LiveAuction(TestCase):
+   # helper methods
+    def setUp(self):
+        init_test_db()
 
-# helper function to set up databse
+    def publishAuction(self):
+        liveAuction = Auction.objects.get(type='live')
+        liveAuction.published = True
+        liveAuction.save()
+
+    # test cases
+    def test_page(self):
+        self.assertTrue(self.client.login(username='admin', password='letmepass'))
+        response = self.client.get(reverse('live'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('live.html')
+
+    def test_Non_published_context(self):
+        self.assertTrue(self.client.login(username='admin', password='letmepass'))
+        response = self.client.get(reverse('live'))
+        self.assertEqual(response.context['published'], False)
+        self.assertEqual(len(response.context['items']), 10)
+        self.assertEqual(response.context['currentItem'].title, LiveItem.objects.filter(sold=False).order_by('pk').first().title)
+
+    def test_published_context(self):
+        self.publishAuction()
+        self.assertTrue(self.client.login(username='admin', password='letmepass'))
+        response = self.client.get(reverse('live'))
+        self.assertEqual(response.context['published'], True)
+        self.assertEqual(len(response.context['items']), 9)
+        self.assertEqual(response.context['currentItem'].title, LiveItem.objects.filter(sold=False).order_by('pk').first().title)
+
+    def test_placeBid(self):
+        self.publishAuction()
+        self.assertTrue(self.client.login(username='admin', password='letmepass'))
+        response = self.client.get(reverse('live'))
+        keyOfFirstCurrentItem = response.context['currentItem'].pk
+        c = Client()
+        postAttempt = c.post(reverse('sellLiveItem'), {'auction_number': 20, 'pk': keyOfFirstCurrentItem, 'amount': 30})
+        self.assertEqual(postAttempt.status_code, 302)
+        response = self.client.get(reverse('live'))
+        self.assertNotEqual(keyOfFirstCurrentItem, response.context['currentItem'].pk)
+
+
+class CreateAccountTest(TestCase):
+    def setUp(self):
+        init_test_db()
+
+    def test_login_redirect(self):
+        response = self.client.get(reverse('create_item'))
+        self.assertRedirects(response, '/login/?next=/create_item')
+
+    def test_login(self):
+        print(AuctionUser.objects.get(username="user1"))
+        loggedIn = self.client.login(username="admin", password="letmepass")
+        print(loggedIn)
+
+# helper function to set up database
 def init_test_db():
     nukeDB()
     AuctionUser.objects.create_user(
@@ -129,7 +185,6 @@ def init_test_db():
         item = SilentItem(
             title=randomString(),
             description=randomString(),
-            imageName=randomString(),
             auction=silentAuction
         )
         item.save()
@@ -137,16 +192,14 @@ def init_test_db():
         user.save()
         new_bid = BidSilent(item=item, amount=12.00, user=AuctionUser.objects.get(auction_number=20))
         new_bid.save()
-        # populated the live database too
         itemLive = LiveItem(
             title=randomString(),
             description=randomString(),
-            imageName=randomString(),
             auction=silentAuction,
+            sold=False
         )
         itemLive.user=AuctionUser.objects.get(auction_number=10)
         itemLive.amount = 10.00
-        itemLive.sold = True
         itemLive.save()
 
 def nukeDB():
@@ -156,3 +209,7 @@ def nukeDB():
     Rule.objects.all().delete()
     AuctionUser.objects.all().delete()
     BidSilent.objects.all().delete()
+    # BidLive.objects.all().delete()
+
+
+

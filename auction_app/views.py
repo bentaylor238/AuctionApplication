@@ -14,7 +14,8 @@ from django.urls import reverse_lazy
 from django.views import generic
 from django.contrib.auth.decorators import login_required
 from .debug_settings import *
-
+from django.contrib import messages
+from django.core.exceptions import ValidationError
 
 @login_required
 def home(request):
@@ -118,7 +119,6 @@ def init_test_db(request):
             item = SilentItem(
                 title=randomString(), 
                 description=randomString(), 
-                imageName=randomString(), 
                 auction=silentAuction
             )
             item.save()
@@ -130,7 +130,6 @@ def init_test_db(request):
             itemLive = LiveItem(
                 title=randomString(),
                 description=randomString(),
-                imageName=randomString(),
                 auction=silentAuction,
             )
             itemLive.user = AuctionUser.objects.get(auction_number=10)
@@ -159,9 +158,7 @@ def delete_item(request):
 
 @login_required
 def live(request):
-    # this prevents non admins from getting to this page if its not a published auction
     liveAuction = Auction.objects.filter(type='live').first()
-
     # perform check to validate proper initialization
     if not liveAuction.published and not request.user.is_superuser:
         return redirect(home)
@@ -176,7 +173,7 @@ def live(request):
     # functionality
     createItemForm = LiveItemForm(initial={'auction':liveAuction})
     currentItem = LiveItem.objects.filter(sold='False').order_by('pk').first()
-    if liveAuction.published:
+    if liveAuction.published and len(LiveItem.objects.filter(sold='False')) != 0:
         items = LiveItem.objects.all().exclude(pk=currentItem.pk)
     else:
         items = LiveItem.objects.all()
@@ -187,7 +184,6 @@ def live(request):
         'createItemForm':createItemForm,
     }
     return render(request, 'live.html', context)
-
 
 
 def sellLiveItem(request):
@@ -209,6 +205,10 @@ def sellLiveItem(request):
 
 @login_required
 def payment(request):
+    #prevent regular users
+    if not request.user.is_superuser:
+        return HttpResponseForbidden()
+
     users = AuctionUser.objects.all()
     for user in users:
         user.amount = 0.0
@@ -291,9 +291,9 @@ def create_item(request):
                 request.POST['end'] = datetime.datetime.strptime(request.POST['end'], '%Y-%m-%dT%H:%M')
             else:
                 request.POST['end'] = None
-            item = SilentItemForm(request.POST)
+            item = SilentItemForm(request.POST, request.FILES)
         elif auctionType == 'live':
-            item = LiveItemForm(request.POST)
+            item = LiveItemForm(request.POST, request.FILES)
 
         #check if valid before saving
         if item.is_valid():
@@ -305,6 +305,7 @@ def create_item(request):
             return redirect(silent) 
         elif auctionType == 'live':
             return redirect(live)
+
     else:
         #not authorized to make request
         return HttpResponseForbidden()
@@ -389,29 +390,56 @@ def submit_bid(request):
 
 @login_required
 def users(request):
+    #prevent regular users
+    if not request.user.is_superuser:
+        return HttpResponseForbidden()
+
+    change_password_form = ChangePasswordForm()
     users = AuctionUser.objects.all()
     form = CreateAccountFormHiddenPass()
     if request.method == 'POST':
-        #set password fields
-        form_data = request.POST.copy()
-        form_data.update(password1="ax7!bwaZc")
-        form_data.update(password2="ax7!bwaZc")
-        #fill form with data
-        form = CreateAccountFormHiddenPass(form_data)
-        if form.is_valid():
-            #save data
-            form.save()
-            return redirect("users")
-        else:
-            #invalid post
-            context = {
-                "users": users,
-                "form":form}
-            return render(request, 'users.html', context)
+        if request.POST.get("create_account", False):
+            #set password fields
+            form_data = request.POST.copy()
+            form_data.update(password1="ax7!bwaZc")
+            form_data.update(password2="ax7!bwaZc")
+            #fill form with data
+            form = CreateAccountFormHiddenPass(form_data)
+            if form.is_valid():
+                #save data
+                form.save()
+                return redirect("users")
+            else:
+                #invalid post
+                context = {
+                    "users": users,
+                    "form":form,
+                    "change_password_form":change_password_form,
+                }
+                return render(request, 'users.html', context)
+
+        if request.POST.get("change_password",False):
+            change_password_form = ChangePasswordForm(request.POST)
+            if change_password_form.is_valid():
+                password = change_password_form.cleaned_data['password1']
+                user = change_password_form.cleaned_data['user']
+                user.set_password(password)
+                user.save()
+                return redirect("users")
+            else:
+                #invalid data
+                context={
+                    "users": users,
+                    "form":form,
+                    "change_password_form":change_password_form,
+                }
+                return render(request, 'users.html', context)
     else:
         #first visit
         context={"users": users,
-                 "form": form}#data to send to the html page goes here
+                 "form": form,
+                 "change_password_form":change_password_form,
+        }#data to send to the html page goes here
         return render(request, 'users.html', context)
 
 
@@ -433,10 +461,13 @@ def updateAuctionNumber(request):
     username = request.POST['username']
     user = AuctionUser.objects.get(username=username)
     user.auction_number = request.POST['auction_number']
-    if user.is_valid():
+    try: 
+        user.full_clean()
         user.save()
+    except ValidationError:
+        messages.error(request, "Auction Number Invalid")
+    return redirect("users")
     
-
 
 #great example of form handling
 def create_account(request):
