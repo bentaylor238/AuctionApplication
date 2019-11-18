@@ -6,9 +6,9 @@ from auction_app.models import AuctionUser
 from django.test.utils import setup_test_environment
 from auction_app.views import *
 
-class CreateAccountTest(TestCase):
-    def setUp(self):
-        init_test_db()
+# class CreateAccountTest(TestCase):
+#     def setUp(self):
+#         init_test_db()
 
 
 # class SilentTest(TestCase):
@@ -95,11 +95,46 @@ class LiveAuction(TestCase):
     def setUp(self):
         init_test_db()
 
-    def test_numberOfItems(self):
-            login = self.client.login(username='user1', password='letmepass')
-            self.assertTrue(login)
-            response = self.client.get(reverse('live'))
-            self.assertEqual(response.status_code, 200)
+    def test_page(self):
+        self.assertTrue(self.client.login(username='admin', password='letmepass'))
+        response = self.client.get(reverse('live'))
+        self.assertEqual(response.status_code, 200)
+
+    def test_Non_published_context(self):
+        self.assertTrue(self.client.login(username='admin', password='letmepass'))
+        response = self.client.get(reverse('live'))
+        self.assertEqual(response.context['published'], False)
+        self.assertEqual(len(response.context['items']), 10)
+        self.assertEqual(response.context['currentItem'].title, LiveItem.objects.filter(sold=False).order_by('pk').first().title)
+
+    def test_published_context(self):
+        liveAuction = Auction.objects.get(type='live')
+        liveAuction.published = True
+        liveAuction.save()
+        self.assertTrue(self.client.login(username='admin', password='letmepass'))
+        response = self.client.get(reverse('live'))
+        self.assertEqual(response.context['published'], True)
+        self.assertEqual(len(response.context['items']), 9)
+        self.assertEqual(response.context['currentItem'].title, LiveItem.objects.filter(sold=False).order_by('pk').first().title)
+
+    def test_placeBid(self):
+        liveAuction = Auction.objects.get(type='live')
+        liveAuction.published = True
+        liveAuction.save()
+        self.assertTrue(self.client.login(username='admin', password='letmepass'))
+        self.client.get('live/')
+# class CreateAccountTest(TestCase):
+#     def setUp(self):
+#         init_test_db()
+#
+#     def test_login_redirect(self):
+#         response = self.client.get(reverse('create_item'))
+#         self.assertRedirects(response, '/login/?next=/create_item')
+#
+#     def test_login(self):
+#         print(AuctionUser.objects.get(username="user1"))
+#         loggedIn = self.client.login(username="admin", password="letmepass")
+#         print(loggedIn)
 
 # helper function to set up database
 def init_test_db():
@@ -145,15 +180,14 @@ def init_test_db():
         user.save()
         new_bid = BidSilent(item=item, amount=12.00, user=AuctionUser.objects.get(auction_number=20))
         new_bid.save()
-        # populated the live database too
         itemLive = LiveItem(
             title=randomString(),
             description=randomString(),
             auction=silentAuction,
+            sold=False
         )
         itemLive.user=AuctionUser.objects.get(auction_number=10)
         itemLive.amount = 10.00
-        itemLive.sold = True
         itemLive.save()
 
 def nukeDB():
@@ -167,15 +201,3 @@ def nukeDB():
 
 
 
-class CreateAccountTest(TestCase):
-    def setUp(self):
-        init_test_db()
-
-    def test_login_redirect(self):
-        response = self.client.get(reverse('create_item'))
-        self.assertRedirects(response, '/login/?next=/create_item')
-
-    def test_login(self):
-        print(AuctionUser.objects.get(username="user1"))
-        loggedIn = self.client.login(username="admin", password="letmepass")
-        print(loggedIn)

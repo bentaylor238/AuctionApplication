@@ -156,9 +156,7 @@ def delete_item(request):
 
 @login_required
 def live(request):
-    # this prevents non admins from getting to this page if it's not a published auction
     liveAuction = Auction.objects.filter(type='live').first()
-
     # perform check to validate proper initialization
     if not liveAuction.published and not request.user.is_superuser:
         return redirect(home)
@@ -173,7 +171,7 @@ def live(request):
     # functionality
     createItemForm = LiveItemForm(initial={'auction':liveAuction})
     currentItem = LiveItem.objects.filter(sold='False').order_by('pk').first()
-    if liveAuction.published:
+    if liveAuction.published and len(LiveItem.objects.filter(sold='False')) != 0:
         items = LiveItem.objects.all().exclude(pk=currentItem.pk)
     else:
         items = LiveItem.objects.all()
