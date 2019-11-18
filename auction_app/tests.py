@@ -6,95 +6,102 @@ from auction_app.models import AuctionUser
 from django.test.utils import setup_test_environment
 from auction_app.views import *
 
-# class CreateAccountTest(TestCase):
-#     def setUp(self):
-#         init_test_db()
-
-
-# class SilentTest(TestCase):
-#     def setUp(self):
-#         init_test_db()
-#
-#     def testPage(self):
-#         login = self.client.login(username='user1', password='letmepass')
-#         self.assertTrue(login)
-#         response = self.client.get(reverse('silent'))
-#         self.assertIsNotNone(response.context)
-#         print('#####', type(response.context))
-#
-#     def setDown(self):
-#         nukeDB()
-#
-# class PaymentViewTest(TestCase):
-#     def setUp(self):
-#         init_test_db()
-#
-#     def test_number_of_users(self):
-#         login = self.client.login(username='admin', password='letmepass')
-#         response = self.client.get(reverse('payment'))
-#         self.assertEqual(len(response.context['users']), 3)
-#
-#     def test_redirect_if_not_logged_in(self):
-#         response = self.client.get(reverse('payment'))
-#         self.assertRedirects(response, '/login/?next=/payment')
-#
-#     def test_view_url_exists_at_desired_location(self):
-#         login = self.client.login(username='admin', password='letmepass')
-#         response = self.client.get(reverse('payment'))
-#         self.assertEqual(str(response.context['user']), 'admin')
-#         self.assertEqual(response.status_code, 200)
-#
-#     def test_user_payment_amount(self):
-#         login = self.client.login(username='admin', password='letmepass')
-#         response = self.client.get(reverse('payment'))
-#         # print(response.context['users'])
-#         for user in response.context['users']:
-#             if user.username == 'user2':
-#                 self.assertEqual(user.amount, 100)
-#             elif user.username == 'user1':
-#                 self.assertEqual(user.amount, 120)
-#             else:
-#                 self.assertEqual(user.amount, 0)
-#
-#     def test_redirect_if_not_admin(self):
-#         login = self.client.login(username='user1', password='letmepass')
-#         response = self.client.get(reverse('users'))
-#         self.assertRedirects(response, '/home/?next=/users')
-#
-# class UsersViewTest(TestCase):
-#     def setUp(self):
-#         init_test_db()
-#
-#     def test_view_url_exists_at_desired_location(self):
-#         login = self.client.login(username='admin', password='letmepass')
-#         # print(login)
-#         response = self.client.get(reverse('users'))
-#         # print(response)
-#         self.assertEqual(str(response.context['user']), 'admin')
-#         self.assertEqual(response.status_code, 200)
-#
-#     def test_redirect_if_not_logged_in(self):
-#         response = self.client.get(reverse('users'))
-#         self.assertRedirects(response, '/login/?next=/users')
-#
-#     def test_users_returned(self):
-#         login = self.client.login(username='admin', password='letmepass')
-#         response = self.client.get(reverse('users'))
-#         self.assertEqual(len(response.context['users']), 3)
-#
-#     def test_redirect_if_not_admin(self):
-#         login = self.client.login(username='user1', password='letmepass')
-#         response = self.client.get(reverse('users'))
-#         self.assertRedirects(response, '/home/?next=/users')
-#
-#     def test_one_plus_one_equals_two(self):
-#         # print("Method: test_one_plus_one_equals_two.")
-#         self.assertEqual(1 + 1, 2)
-
-class LiveAuction(TestCase):
+class CreateAccountTest(TestCase):
     def setUp(self):
         init_test_db()
 
+
+class SilentTest(TestCase):
+    def setUp(self):
+        init_test_db()
+
+    def testPage(self):
+        login = self.client.login(username='user1', password='letmepass')
+        self.assertTrue(login)
+        response = self.client.get(reverse('silent'))
+        self.assertIsNotNone(response.context)
+        print('#####', type(response.context))
+
+    def setDown(self):
+        nukeDB()
+
+class PaymentViewTest(TestCase):
+    def setUp(self):
+        init_test_db()
+
+    def test_number_of_users(self):
+        login = self.client.login(username='admin', password='letmepass')
+        response = self.client.get(reverse('payment'))
+        self.assertEqual(len(response.context['users']), 3)
+
+    def test_redirect_if_not_logged_in(self):
+        response = self.client.get(reverse('payment'))
+        self.assertRedirects(response, '/login/?next=/payment')
+
+    def test_view_url_exists_at_desired_location(self):
+        login = self.client.login(username='admin', password='letmepass')
+        response = self.client.get(reverse('payment'))
+        self.assertEqual(str(response.context['user']), 'admin')
+        self.assertEqual(response.status_code, 200)
+
+    def test_user_payment_amount(self):
+        login = self.client.login(username='admin', password='letmepass')
+        response = self.client.get(reverse('payment'))
+        # print(response.context['users'])
+        for user in response.context['users']:
+            if user.username == 'user2':
+                self.assertEqual(user.amount, 100)
+            elif user.username == 'user1':
+                self.assertEqual(user.amount, 120)
+            else:
+                self.assertEqual(user.amount, 0)
+
+    def test_redirect_if_not_admin(self):
+        login = self.client.login(username='user1', password='letmepass')
+        response = self.client.get(reverse('users'))
+        self.assertRedirects(response, '/home/?next=/users')
+
+class UsersViewTest(TestCase):
+    def setUp(self):
+        init_test_db()
+
+    def test_view_url_exists_at_desired_location(self):
+        login = self.client.login(username='admin', password='letmepass')
+        # print(login)
+        response = self.client.get(reverse('users'))
+        # print(response)
+        self.assertEqual(str(response.context['user']), 'admin')
+        self.assertEqual(response.status_code, 200)
+
+    def test_redirect_if_not_logged_in(self):
+        response = self.client.get(reverse('users'))
+        self.assertRedirects(response, '/login/?next=/users')
+
+    def test_users_returned(self):
+        login = self.client.login(username='admin', password='letmepass')
+        response = self.client.get(reverse('users'))
+        self.assertEqual(len(response.context['users']), 3)
+
+    def test_redirect_if_not_admin(self):
+        login = self.client.login(username='user1', password='letmepass')
+        response = self.client.get(reverse('users'))
+        self.assertRedirects(response, '/home/?next=/users')
+
+    def test_one_plus_one_equals_two(self):
+        # print("Method: test_one_plus_one_equals_two.")
+        self.assertEqual(1 + 1, 2)
+
+class LiveAuction(TestCase):
+   # helper methods
+    def setUp(self):
+        init_test_db()
+
+    def publishAuction(self):
+        liveAuction = Auction.objects.get(type='live')
+        liveAuction.published = True
+        liveAuction.save()
+
+    # test cases
     def test_page(self):
         self.assertTrue(self.client.login(username='admin', password='letmepass'))
         response = self.client.get(reverse('live'))
@@ -120,40 +127,26 @@ class LiveAuction(TestCase):
         self.publishAuction()
         self.assertTrue(self.client.login(username='admin', password='letmepass'))
         response = self.client.get(reverse('live'))
+        keyOfFirstCurrentItem = response.context['currentItem'].pk
         c = Client()
-        postAttempt = c.post(reverse('sellLiveItem'), {'auction_number': 20, 'pk': response.context['currentItem'].pk, 'amount': 30})
+        postAttempt = c.post(reverse('sellLiveItem'), {'auction_number': 20, 'pk': keyOfFirstCurrentItem, 'amount': 30})
         self.assertEqual(postAttempt.status_code, 302)
-
-        # dog = self.client.get(reverse('live'))
-        # self.assertEqual(len(dog.context['items']), 8)
-
-
-        '''
-        auction_number
-        pk
-        amount
-        '''
+        response = self.client.get(reverse('live'))
+        self.assertNotEqual(keyOfFirstCurrentItem, response.context['currentItem'].pk)
 
 
+class CreateAccountTest(TestCase):
+    def setUp(self):
+        init_test_db()
 
+    def test_login_redirect(self):
+        response = self.client.get(reverse('create_item'))
+        self.assertRedirects(response, '/login/?next=/create_item')
 
-    def publishAuction(self):
-        liveAuction = Auction.objects.get(type='live')
-        liveAuction.published = True
-        liveAuction.save()
-
-# class CreateAccountTest(TestCase):
-#     def setUp(self):
-#         init_test_db()
-#
-#     def test_login_redirect(self):
-#         response = self.client.get(reverse('create_item'))
-#         self.assertRedirects(response, '/login/?next=/create_item')
-#
-#     def test_login(self):
-#         print(AuctionUser.objects.get(username="user1"))
-#         loggedIn = self.client.login(username="admin", password="letmepass")
-#         print(loggedIn)
+    def test_login(self):
+        print(AuctionUser.objects.get(username="user1"))
+        loggedIn = self.client.login(username="admin", password="letmepass")
+        print(loggedIn)
 
 # helper function to set up database
 def init_test_db():
