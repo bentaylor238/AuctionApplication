@@ -22,8 +22,9 @@ def home(request):
     # get general data to display to admin
     silentBids = BidSilent.objects.all()
     liveItems = LiveItem.objects.all()
-    silentCount = SilentItem.objects.all().count()
     liveCount = liveItems.count()
+    liveSoldCount = liveItems.filter(sold=True).count()
+    silentCount = SilentItem.objects.all().count()
     totalUsers = AuctionUser.objects.all().count()
     totalEarned = 0
     for bid in silentBids:
@@ -32,12 +33,28 @@ def home(request):
     for item in liveItems:
         if item.sold:
             totalEarned += item.amount
-    dashboard = {
-        "silentCount": silentCount,
-        "liveCount": liveCount,
-        "totalUsers": totalUsers,
-        "totalEarned": totalEarned,
-    }
+    dashboard = [
+        {
+            "label": "Items in Silent Auction",
+            "value": silentCount,
+        },
+        {
+            "label": "Items in Live Auction TOTAL",
+            "value": liveCount,
+        },
+        {
+            "label": "Items in Live Auction SOLD",
+            "value": liveSoldCount,
+        },
+        {
+            "label": "Total Users",
+            "value": totalUsers,
+        },  
+        {
+            "label": "Total amount Earned",
+            "value": totalEarned,
+        },
+    ]
 
     if request.method == "POST":
         # for key in request.POST:

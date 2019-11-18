@@ -49,11 +49,11 @@
                 <br>
                 <h4>Dashboard</h4>
                 <hr>
-                {% for label, value in dashboard.items %}
+                {% for item in dashboard %}
                 <div>
-                    <span> {{ label }} </span>
+                    <span> {{ item.label }} </span>
                     <pre style="display:inline;">:   </pre>
-                    <span> {{ value}} </span>
+                    <span> {{ item.value }} </span>
                 </div>
                 {% endfor %}
             {% endif %}
