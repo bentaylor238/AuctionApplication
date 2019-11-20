@@ -5,7 +5,7 @@
     {% else %}
         <h3> Home Page </h3>
     {% endif %}
-    
+
     <div class="row">
         <div class="col-2">
                 <a href="{% url "rules" %}"> rules</a> <br>
@@ -43,8 +43,54 @@
     <div class="row">
         <div class="col-md">
             {% if not user.is_superuser%}
-                <label>Total Amount Bid: </label>
-                <p>{{ user.amount }}</p>
+            <table>
+                <tr>
+                    <td style="padding-right:30px;">
+                        <h5>Total Amount Bid (Live & Silent):</h5>
+                        <h5>${{ user.amount }}</h5>
+                    </td>
+                    <td style="padding-right:30px;">
+                        <h5>Total Live Auction Bids:</h5>
+                        <h5>${{ user.liveAmount }}</h5>
+                    </td>
+                    <td>
+                        <h5>Total Silent Auction Bids:</h5>
+                        <h5>${{ user.silentAmount }}</h5>
+                    </td>
+                </tr>
+            </table>
+            <label><h5>Live Auction Items Won:</h5></label>
+            <table>
+                <tr class="row">
+                    {% for item in user.items %}
+                        <td>
+                            <div class="card" style="width: 10em;">
+                            <div class="card-header greenBackground"><h2>{{ item.title }}</h2> </div>
+                            <div class="card-body">
+                                <img src="{{ item.image.url }}" class="card-img-top" alt="image"></img>
+                                <p>{{ item.description }}</p>
+                                <p>Current Bid: {{ bid }}</p>
+                            </div>
+                        </td>
+                    {% endfor %}
+                </tr>
+            </table>
+            <label><h5>Silent Auction Winning Items:</h5></label>
+            <table>
+                <tr class="row">
+                    {% for item in user.winningItems %}
+                        <td>
+                            <div class="card" style="width: 10em;">
+                            <div class="card-header greenBackground"><h2>{{ item.title }}</h2> </div>
+                            <div class="card-body">
+                                <img src="{{ item.image.url }}" class="card-img-top" alt="image"></img>
+                                <p>{{ item.description }}</p>
+                                <p>Current Bid: {{ bid }}</p>
+                            </div>
+                        </td>
+                    {% endfor %}
+                </tr>
+            </table>
             {% else %}
                 <br>
                 <h4>Dashboard</h4>

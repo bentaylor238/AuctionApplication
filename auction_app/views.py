@@ -52,13 +52,11 @@ def home(request):
         },  
         {
             "label": "Total amount Earned",
-            "value": totalEarned,
+            "value": "$"+str(totalEarned),
         },
     ]
 
     if request.method == "POST":
-        # for key in request.POST:
-        #     print(f"\t{key} => {request.POST[key]}")
         request.POST = request.POST.copy() #create a mutable post
         request.POST['published'] = not getBool(request.POST['published'])
         auctionType = request.POST['type']
@@ -72,17 +70,23 @@ def home(request):
     auctionForms = [silentForm, liveForm]
 
     user = request.user
-    user.amount = 0
+    user.totalAmount = 0
+    user.liveAmount = 0
+    user.silentAmount = 0
     user.items = []
+    user.winningItems = []
     userBids = BidSilent.objects.filter(user__id=user.id)
     for bid in userBids:
         if bid.isWinning:
-            user.amount+=bid.amount
+            user.totalAmount+=bid.amount
+            user.silentAmount+=bid.amount
+            user.winningItems.append(bid.item)
     liveItems = LiveItem.objects.filter(user__id=user.id)
     for item in liveItems:
-        user.amount+=item.amount
+        user.totalAmount+=item.amount
+        user.liveAmount+=item.amount
         user.items.append(item)
-    print(user.amount)
+    print(user.totalAmount)
     user.save()
 
     context={"forms":auctionForms,
@@ -237,6 +241,7 @@ def payment(request):
         for bid in bids:
             if bid.isWinning:
                 user.amount += bid.amount
+                user.items.append(bid.item)
                 # print(bid.user, bid.amount)
 
         # for live

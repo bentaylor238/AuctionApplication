@@ -40,9 +40,9 @@
                         </form>
                     </td>
                     <td>Items Won:</td>
-                    {% for item in user.items %}
-                        <td>{{ item.title }}</td>
-                    {% endfor %}
+                        {% for item in user.items %}
+                            <td>{{ item.title }}</td>
+                        {% endfor %}
                 </tr>
             {% endfor %}
         {% else %}
