@@ -49,7 +49,7 @@ class LiveItemForm(forms.ModelForm):
     class Meta:
         model = LiveItem
         fields = ('title','description','image','auction')
-        widgets ={
+        widgets = {
             'auction':forms.HiddenInput()
         }
 
