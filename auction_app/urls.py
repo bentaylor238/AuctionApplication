@@ -3,6 +3,7 @@ from django.contrib import admin
 from . import views
 
 urlpatterns = [
+    path('updateSuperUser', views.updateSuperUser, name="updateSuperUser"),
     path('delete_item', views.delete_item, name="delete_item"),
     path('create_item', views.create_item, name="create_item"),
     path('sellLiveItem', views.sellLiveItem, name='sellLiveItem'),
