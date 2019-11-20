@@ -15,7 +15,7 @@ from django.views import generic
 from django.contrib.auth.decorators import login_required
 from .debug_settings import *
 from django.contrib import messages
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 @login_required
 def home(request):
@@ -185,21 +185,15 @@ def live(request):
 
 
 def sellLiveItem(request):
-    soldItem = LiveItem.objects.get(pk=request.POST['pk'])
     try:
-        soldItem.user=AuctionUser.objects.get(auction_number=request.POST['auction_number'])
+        soldItem = LiveItem.objects.get(pk=request.POST['pk'])
+        soldItem.user = AuctionUser.objects.get(auction_number=request.POST['auction_number'])
         soldItem.amount = request.POST['amount']
         soldItem.sold = True
         soldItem.save()
-        return redirect(live)
-    except Exception as e:
-        context = {
-            'item': soldItem,
-            'error': e,
-            'auctionNumber': request.POST['auction_number']
-        }
-        return render(request, 'liveErrorMessage.html', context)
-
+    except ObjectDoesNotExist:
+        messages.error(request, "Auction Number Invalid")
+    return redirect(live)
 
 @login_required
 def payment(request):
