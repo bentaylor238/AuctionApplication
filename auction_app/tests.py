@@ -15,12 +15,41 @@ class SilentTest(TestCase):
     def setUp(self):
         init_test_db()
 
-    def testPage(self):
-        login = self.client.login(username='user1', password='letmepass')
+    def test_Page(self):
+        login = self.client.login(username='admin', password='letmepass')
         self.assertTrue(login)
         response = self.client.get(reverse('silent'))
-        self.assertIsNotNone(response.context)
-        print('#####', type(response.context))
+        self.assertIsNone(response.context)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('silent.html')
+
+    def test_Non_published_context(self):
+        self.assertTrue(self.client.login(username='admin', password='letmepass'))
+        response = self.client.get(reverse('silent'))
+        self.assertEqual(response.context['published'], False)
+        # TODO: set auction to published here
+        # self.assertEqual(len(response.context['winning']), 0)
+        # self.assertEqual(len(response.context['bidon']), 0)
+
+    def test_published_context(self):
+        self.assertTrue(self.client.login(username='user1', password='letmepass'))
+        response = self.client.get(reverse('silent'))
+        # TODO: need to make auction published here, or make another auction in init
+        self.assertEqual(response.context['published'], True)
+        self.assertEqual(len(response.context['winning']), 1)
+        self.assertEqual(len(response.context['bidon']), 1)
+
+    def test_placeBid(self):
+        # self.publishAuction()
+        # self.assertTrue(self.client.login(username='admin', password='letmepass'))
+        # response = self.client.get(reverse('silent'))
+        # keyOfFirstCurrentItem = response.context['currentItem'].pk
+        # c = Client()
+        # postAttempt = c.post(reverse('sellLiveItem'), {'auction_number': 20, 'pk': keyOfFirstCurrentItem, 'amount': 30})
+        # self.assertEqual(postAttempt.status_code, 302)
+        # response = self.client.get(reverse('live'))
+        # self.assertNotEqual(keyOfFirstCurrentItem, response.context['currentItem'].pk)
+        pass
 
     def setDown(self):
         nukeDB()
@@ -210,6 +239,3 @@ def nukeDB():
     AuctionUser.objects.all().delete()
     BidSilent.objects.all().delete()
     # BidLive.objects.all().delete()
-
-
-

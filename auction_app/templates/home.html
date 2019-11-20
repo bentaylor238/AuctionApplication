@@ -1,39 +1,64 @@
 {% extends 'base.html' %}
 {% block content %}
-    <div class="col-md">
     {% if user.is_superuser %}
         <h3> Admin Home Page </h3>
     {% else %}
         <h3> Home Page </h3>
     {% endif %}
-        <a href="{% url "rules" %}"> rules</a> <br>
-    {% if user.is_superuser or forms.0.published.value%}
-        <a href="{% url "silent" %}"/> silent auction</a> <br>
-    {% endif %}
-    {% if user.is_superuser or forms.1.published.value%}
-        <a href="{% url "live" %}"/> live auction</a> <br>
-    {% endif %}
-    {% if user.is_superuser%}
-        <a href="{% url "users" %}"/> users</a> <br>
-        <a href="{% url "payment" %}"/> payment</a> <br>
-    {% endif %}
-    {% if not user.is_superuser%}
-        <table>
-            <tr>
-                <td style="padding-right:30px;">
-                    <h5>Total Amount Bid (Live & Silent):</h5>
-                    <h5>${{ user.amount }}</h5>
-                </td>
-                <td style="padding-right:30px;">
-                    <h5>Total Live Auction Bids:</h5>
-                    <h5>${{ user.liveAmount }}</h5>
-                </td>
-                <td>
-                    <h5>Total Silent Auction Bids:</h5>
-                    <h5>${{ user.silentAmount }}</h5>
-                </td>
-            </tr>
-        </table>
+
+    <div class="row">
+        <div class="col-2">
+                <a href="{% url "rules" %}"> rules</a> <br>
+            {% if user.is_superuser or forms.0.published.value%}
+                <a href="{% url "silent" %}"/> silent auction</a> <br>
+            {% endif %}
+            {% if user.is_superuser or forms.1.published.value%}
+                <a href="{% url "live" %}"/> live auction</a> <br>
+            {% endif %}
+            {% if user.is_superuser%}
+                <a href="{% url "users" %}"/> users</a> <br>
+                <a href="{% url "payment" %}"/> payment</a> <br>
+            {% endif %}
+        </div>
+        {% if user.is_superuser %}
+        <div class="col-2"> 
+            <table>
+                {% for form in forms%}
+                <form action="home" method="post">
+                    {% csrf_token %}
+                    {{form.published.as_hidden}}
+                    {{form.type.as_hidden}}
+                    {% if form.published.value %}
+                        <button type="submit"> Hide {{ form.type.value }}</button>
+                    {% else %}
+                        <button type="submit"> Publish {{ form.type.value }}</button>
+                    {% endif %}
+                </form> <br>
+                {% endfor %}
+            </table>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="row">
+        <div class="col-md">
+            {% if not user.is_superuser%}
+            <table>
+                <tr>
+                    <td style="padding-right:30px;">
+                        <h5>Total Amount Bid (Live & Silent):</h5>
+                        <h5>${{ user.amount }}</h5>
+                    </td>
+                    <td style="padding-right:30px;">
+                        <h5>Total Live Auction Bids:</h5>
+                        <h5>${{ user.liveAmount }}</h5>
+                    </td>
+                    <td>
+                        <h5>Total Silent Auction Bids:</h5>
+                        <h5>${{ user.silentAmount }}</h5>
+                    </td>
+                </tr>
+            </table>
             <label><h5>Live Auction Items Won:</h5></label>
             <table>
                 <tr class="row">
@@ -48,7 +73,6 @@
                             </div>
                         </td>
                     {% endfor %}
-
                 </tr>
             </table>
             <label><h5>Silent Auction Winning Items:</h5></label>
@@ -67,23 +91,18 @@
                     {% endfor %}
                 </tr>
             </table>
-    {% endif %}
-    {% if user.is_superuser %}
-        <table>
-            {% for form in forms%}
-            <form action="home" method="post">
-                {% csrf_token %}
-                {{form.published.as_hidden}}
-                {{form.type.as_hidden}}
-                {% if form.published.value %}
-                    <button type="submit"> Hide {{ form.type.value }}</button>
-                {% else %}
-                    <button type="submit"> Publish {{ form.type.value }}</button>
-                {% endif %}
-            </form> <br>
-            {% endfor %}
-            <p>Total Auction Winnings: ${{ totalWinnings }}</p>
-        </table>
-    {% endif %}
+            {% else %}
+                <br>
+                <h4>Dashboard</h4>
+                <hr>
+                {% for item in dashboard %}
+                <div>
+                    <span> {{ item.label }} </span>
+                    <pre style="display:inline;">:   </pre>
+                    <span> {{ item.value }} </span>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
     </div>
 {% endblock %}
