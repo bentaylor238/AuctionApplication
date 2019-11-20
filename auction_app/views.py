@@ -35,19 +35,23 @@ def home(request):
     auctionForms = [silentForm, liveForm]
 
     user = request.user
-    user.amount = 0
+    user.totalAmount = 0
+    user.liveAmount = 0
+    user.silentAmount = 0
     user.items = []
     user.winningItems = []
     userBids = BidSilent.objects.filter(user__id=user.id)
     for bid in userBids:
         if bid.isWinning:
-            user.amount+=bid.amount
+            user.totalAmount+=bid.amount
+            user.silentAmount+=bid.amount
             user.winningItems.append(bid.item)
     liveItems = LiveItem.objects.filter(user__id=user.id)
     for item in liveItems:
-        user.amount+=item.amount
+        user.totalAmount+=item.amount
+        user.liveAmount+=item.amount
         user.items.append(item)
-    print(user.amount)
+    print(user.totalAmount)
     user.save()
 
     auctionTotalWinnings = 0
@@ -212,6 +216,7 @@ def payment(request):
         for bid in bids:
             if bid.isWinning:
                 user.amount += bid.amount
+                user.items.append(bid.item)
                 # print(bid.user, bid.amount)
 
         # for live
