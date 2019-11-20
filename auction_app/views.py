@@ -15,7 +15,7 @@ from django.views import generic
 from django.contrib.auth.decorators import login_required
 from .debug_settings import *
 from django.contrib import messages
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 @login_required
 def home(request):
@@ -183,9 +183,7 @@ def delete_item(request):
 
 @login_required
 def live(request):
-    # this prevents non admins from getting to this page if its not a published auction
     liveAuction = Auction.objects.filter(type='live').first()
-
     # perform check to validate proper initialization
     if not liveAuction.published and not request.user.is_superuser:
         return redirect(home)
@@ -200,7 +198,7 @@ def live(request):
     # functionality
     createItemForm = LiveItemForm(initial={'auction':liveAuction})
     currentItem = LiveItem.objects.filter(sold='False').order_by('pk').first()
-    if liveAuction.published:
+    if liveAuction.published and len(LiveItem.objects.filter(sold='False')) != 0:
         items = LiveItem.objects.all().exclude(pk=currentItem.pk)
     else:
         items = LiveItem.objects.all()
@@ -214,21 +212,15 @@ def live(request):
 
 
 def sellLiveItem(request):
-    soldItem = LiveItem.objects.get(pk=request.POST['pk'])
     try:
-        soldItem.user=AuctionUser.objects.get(auction_number=request.POST['auction_number'])
+        soldItem = LiveItem.objects.get(pk=request.POST['pk'])
+        soldItem.user = AuctionUser.objects.get(auction_number=request.POST['auction_number'])
         soldItem.amount = request.POST['amount']
         soldItem.sold = True
         soldItem.save()
-        return redirect(live)
-    except Exception as e:
-        context = {
-            'item': soldItem,
-            'error': e,
-            'auctionNumber': request.POST['auction_number']
-        }
-        return render(request, 'liveErrorMessage.html', context)
-
+    except ObjectDoesNotExist:
+        messages.error(request, "Auction Number Invalid")
+    return redirect(live)
 
 @login_required
 def payment(request):
@@ -401,7 +393,6 @@ def submit_bid(request):
                         oldbid = currentitem.bidsilent_set.order_by("amount").last()
                         oldbid.isWinning = False
                         oldbid.save()
-                        print('&&&&&', type(oldbid))
                         new_bid = BidSilent(item=currentitem, amount=amount, user=AuctionUser.objects.get(username=request.user.username), isWinning=True)
                         new_bid.save()
                 else:
