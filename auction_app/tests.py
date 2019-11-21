@@ -19,7 +19,7 @@ class SilentTest(TestCase):
         login = self.client.login(username='admin', password='letmepass')
         self.assertTrue(login)
         response = self.client.get(reverse('silent'))
-        self.assertIsNone(response.context)
+        self.assertIsNotNone(response.context)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('silent.html')
 
@@ -27,29 +27,39 @@ class SilentTest(TestCase):
         self.assertTrue(self.client.login(username='admin', password='letmepass'))
         response = self.client.get(reverse('silent'))
         self.assertEqual(response.context['published'], False)
-        # TODO: set auction to published here
-        # self.assertEqual(len(response.context['winning']), 0)
-        # self.assertEqual(len(response.context['bidon']), 0)
 
-    def test_published_context(self):
+    def test_published_context_user1(self):
         self.assertTrue(self.client.login(username='user1', password='letmepass'))
+        silentAuction = Auction.objects.get(type='silent')
+        silentAuction.published = True
+        silentAuction.save()
         response = self.client.get(reverse('silent'))
-        # TODO: need to make auction published here, or make another auction in init
         self.assertEqual(response.context['published'], True)
-        self.assertEqual(len(response.context['winning']), 1)
-        self.assertEqual(len(response.context['bidon']), 1)
+        self.assertEqual(len(response.context['winning']), 0)
+        self.assertEqual(len(response.context['bidon']), 10)
+        self.assertEqual(len(response.context['unbid']), 10)
+
+    def test_published_context_user2(self):
+        self.assertTrue(self.client.login(username='user2', password='letmepass'))
+        silentAuction = Auction.objects.get(type='silent')
+        silentAuction.published = True
+        silentAuction.save()
+        response = self.client.get(reverse('silent'))
+        self.assertEqual(response.context['published'], True)
+        self.assertEqual(len(response.context['winning']), 10)
+        self.assertEqual(len(response.context['bidon']), 0)
+        self.assertEqual(len(response.context['unbid']), 10)
 
     def test_placeBid(self):
-        # self.publishAuction()
-        # self.assertTrue(self.client.login(username='admin', password='letmepass'))
-        # response = self.client.get(reverse('silent'))
-        # keyOfFirstCurrentItem = response.context['currentItem'].pk
-        # c = Client()
-        # postAttempt = c.post(reverse('sellLiveItem'), {'auction_number': 20, 'pk': keyOfFirstCurrentItem, 'amount': 30})
-        # self.assertEqual(postAttempt.status_code, 302)
-        # response = self.client.get(reverse('live'))
-        # self.assertNotEqual(keyOfFirstCurrentItem, response.context['currentItem'].pk)
-        pass
+        self.assertTrue(self.client.login(username='user1', password='letmepass'))
+        silentAuction = Auction.objects.get(type='silent')
+        silentAuction.published = True
+        silentAuction.save()
+        item = SilentItem.objects.all().first()
+        postAttempt = Client().post(reverse('submit_bid'), {'item_id': item.id, 'amount': 3.0})
+        self.assertEqual(postAttempt.status_code, 302)
+        response = self.client.get(reverse('silent'))
+        self.assertEqual(len(response.context['winning']), 1)
 
     def setDown(self):
         nukeDB()
@@ -217,10 +227,18 @@ def init_test_db():
             auction=silentAuction
         )
         item.save()
-        user = AuctionUser.objects.all().first()
-        user.save()
-        new_bid = BidSilent(item=item, amount=12.00, user=AuctionUser.objects.get(auction_number=20))
+        user = AuctionUser.objects.get(username='user1')
+        new_bid = BidSilent(item=item, amount=1.0, user=user)
         new_bid.save()
+        user = AuctionUser.objects.get(username='user2')
+        new_bid = BidSilent(item=item, amount=2.0, user=user)
+        new_bid.save()
+        item = SilentItem(
+            title=randomString(),
+            description=randomString(),
+            auction=silentAuction
+        )
+        item.save()
         itemLive = LiveItem(
             title=randomString(),
             description=randomString(),
