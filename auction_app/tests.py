@@ -56,7 +56,7 @@ class SilentTest(TestCase):
         silentAuction.published = True
         silentAuction.save()
         item = SilentItem.objects.all().first()
-        postAttempt = Client().post(reverse('submit_bid'), {'item_id': item.id, 'amount': 3.0})
+        postAttempt = self.client.post(reverse('submit_bid'), {'item_id': item.id, 'amount': 3.0})
         self.assertEqual(postAttempt.status_code, 302)
         response = self.client.get(reverse('silent'))
         self.assertEqual(len(response.context['winning']), 1)
