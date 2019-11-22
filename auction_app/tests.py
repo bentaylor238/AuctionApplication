@@ -1,14 +1,10 @@
 from django.test import TestCase, Client
 from django.urls import reverse
-from auction_app.forms import *
 from django.utils import timezone
-from auction_app.models import AuctionUser
 from django.test.utils import setup_test_environment
-from auction_app.views import *
-
-class CreateAccountTest(TestCase):
-    def setUp(self):
-        init_test_db()
+from .models import AuctionUser
+from .forms import *
+from .views import *
 
 
 class SilentTest(TestCase):
@@ -89,16 +85,16 @@ class PaymentViewTest(TestCase):
         # print(response.context['users'])
         for user in response.context['users']:
             if user.username == 'user2':
-                self.assertEqual(user.amount, 100)
-            elif user.username == 'user1':
                 self.assertEqual(user.amount, 120)
+            elif user.username == 'user1':
+                self.assertEqual(user.amount, 10)
             else:
                 self.assertEqual(user.amount, 0)
 
     def test_redirect_if_not_admin(self):
         login = self.client.login(username='user1', password='letmepass')
         response = self.client.get(reverse('users'))
-        self.assertRedirects(response, '/home/?next=/users')
+        self.assertEquals(response.status_code, 403)
 
 class UsersViewTest(TestCase):
     def setUp(self):
@@ -124,7 +120,7 @@ class UsersViewTest(TestCase):
     def test_redirect_if_not_admin(self):
         login = self.client.login(username='user1', password='letmepass')
         response = self.client.get(reverse('users'))
-        self.assertRedirects(response, '/home/?next=/users')
+        self.assertEquals(response.status_code, 403)
 
     def test_one_plus_one_equals_two(self):
         # print("Method: test_one_plus_one_equals_two.")
@@ -186,14 +182,75 @@ class CreateAccountTest(TestCase):
     def setUp(self):
         init_test_db()
 
+    def test_page_hit(self):
+        response = self.client.get(reverse('create_account'))
+        self.assertTemplateUsed('createAccount.html')
+    
+    def test_create_user(self):
+        goodUser = {
+            "first_name":"joey",
+            "last_name":"carlisle",
+            "username":"jstephinator",
+            "email":"joey.carlisle@gmail.com",
+            "password1":"thisShouldDoTheTrick",
+            "password2":"thisShouldDoTheTrick",
+        }
+        badUser = {
+            "first_name":"ben",
+            "last_name":"taylor",
+            "username":"youKnowYouLoveMe",
+            "email":"ben@sucks.com",
+            "password1":"thisShouldFail",
+            "password2":"thisShouldAlsoFail",
+        }
+        response = self.client.post(reverse('create_account'), goodUser)
+        self.assertRedirects(response, '/rules')
+        try:
+            goodUser = AuctionUser.objects.get(username="jstephinator")
+        except:
+            goodUser = None
+        self.assertIsNotNone(goodUser)
+        response = self.client.post(reverse('create_account'), badUser)
+        self.assertTemplateUsed('createAccount.html')
+        try:
+            badUser = AuctionUser.objects.get(username="youKnowYouLoveMe")
+            exceptionThrown = False
+        except:
+            exceptionThrown = True
+        self.assertTrue(exceptionThrown)
+
+class HomeTest(TestCase):
+    def setUp(self):
+        init_test_db()
+
     def test_login_redirect(self):
-        response = self.client.get(reverse('create_item'))
-        self.assertRedirects(response, '/login/?next=/create_item')
+        response = self.client.get(reverse('home'))
+        self.assertRedirects(response, '/login/?next=/')
 
     def test_login(self):
-        print(AuctionUser.objects.get(username="user1"))
+        # print(AuctionUser.objects.get(username="user1"))
         loggedIn = self.client.login(username="admin", password="letmepass")
-        print(loggedIn)
+        self.assertTrue(loggedIn)
+
+class loginTest(TestCase):
+    def setUp(self):
+        init_test_db()
+    
+    def test_page_hit(self):
+        response = self.client.get(reverse('login'))
+        self.assertEqual(response.status_code, 200)
+    
+    def test_login(self):
+        goodLoginData = {
+            "username": "user1",
+            "password": "letmepass",
+        }
+        badLoginData = {
+            "username": "user1",
+            "password": "donotletmepass",
+        }
+        response = self.client.post(reverse('login'), goodLoginData)
+        self.assertRedirects(response, '/afterLogin', target_status_code=302)
 
 # helper function to set up database
 def init_test_db():
