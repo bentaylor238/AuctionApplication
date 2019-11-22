@@ -86,7 +86,6 @@ def home(request):
         user.totalAmount+=item.amount
         user.liveAmount+=item.amount
         user.items.append(item)
-    print(user.totalAmount)
     user.save()
 
     context={"forms":auctionForms,
@@ -512,7 +511,6 @@ def create_account(request):
         form = CreateAccountForm(request.POST)
         if form.is_valid():
             #save data and login the resulting user
-            print(form.cleaned_data)
             user = form.save()
             login(request, user)
             #redirect to rules view
