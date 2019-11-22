@@ -56,7 +56,7 @@ class SilentTest(TestCase):
         silentAuction.published = True
         silentAuction.save()
         item = SilentItem.objects.all().first()
-        postAttempt = Client().post(reverse('submit_bid'), {'item_id': item.id, 'amount': 3.0})
+        postAttempt = self.client.post(reverse('submit_bid'), {'item_id': item.id, 'amount': 3.0})
         self.assertEqual(postAttempt.status_code, 302)
         response = self.client.get(reverse('silent'))
         self.assertEqual(len(response.context['winning']), 1)
@@ -131,7 +131,7 @@ class UsersViewTest(TestCase):
         self.assertEqual(1 + 1, 2)
 
 class LiveAuction(TestCase):
-   # helper methods
+    # helper methods
     def setUp(self):
         init_test_db()
 
@@ -162,17 +162,25 @@ class LiveAuction(TestCase):
         self.assertEqual(len(response.context['items']), 9)
         self.assertEqual(response.context['currentItem'].title, LiveItem.objects.filter(sold=False).order_by('pk').first().title)
 
-    def test_placeBid(self):
+    def test_placeBids(self):
         self.publishAuction()
         self.assertTrue(self.client.login(username='admin', password='letmepass'))
         response = self.client.get(reverse('live'))
         keyOfFirstCurrentItem = response.context['currentItem'].pk
+        amountOfFirstBid = 30
         c = Client()
-        postAttempt = c.post(reverse('sellLiveItem'), {'auction_number': 20, 'pk': keyOfFirstCurrentItem, 'amount': 30})
+
+        # place a bid on the currentItem
+        postAttempt = c.post(reverse('sellLiveItem'), {'auction_number': 20, 'pk': keyOfFirstCurrentItem, 'amount': amountOfFirstBid})
         self.assertEqual(postAttempt.status_code, 302)
         response = self.client.get(reverse('live'))
         self.assertNotEqual(keyOfFirstCurrentItem, response.context['currentItem'].pk)
 
+        # place a bid on an item that has already been bid on
+        postAttempt = c.post(reverse('sellLiveItem'), {'auction_number': 20, 'pk': keyOfFirstCurrentItem, 'amount' : amountOfFirstBid + 10 })
+        self.assertEqual(postAttempt.status_code, 302)
+        response = self.client.get(reverse('live'))
+        self.assertNotEqual(response.context['items'].get(pk=keyOfFirstCurrentItem).amount, amountOfFirstBid)
 
 class CreateAccountTest(TestCase):
     def setUp(self):

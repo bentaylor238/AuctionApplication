@@ -19,9 +19,44 @@ from django.core.exceptions import ValidationError, ObjectDoesNotExist
 
 @login_required
 def home(request):
+    # get general data to display to admin
+    silentBids = BidSilent.objects.all()
+    liveItems = LiveItem.objects.all()
+    liveCount = liveItems.count()
+    liveSoldCount = liveItems.filter(sold=True).count()
+    silentCount = SilentItem.objects.all().count()
+    totalUsers = AuctionUser.objects.all().count()
+    totalEarned = 0
+    for bid in silentBids:
+        if bid.isWinning:
+            totalEarned += bid.amount
+    for item in liveItems:
+        if item.sold:
+            totalEarned += item.amount
+    dashboard = [
+        {
+            "label": "Items in Silent Auction",
+            "value": silentCount,
+        },
+        {
+            "label": "Items in Live Auction TOTAL",
+            "value": liveCount,
+        },
+        {
+            "label": "Items in Live Auction SOLD",
+            "value": liveSoldCount,
+        },
+        {
+            "label": "Total Users",
+            "value": totalUsers,
+        },  
+        {
+            "label": "Total amount Earned",
+            "value": "$"+str(totalEarned),
+        },
+    ]
+
     if request.method == "POST":
-        # for key in request.POST:
-        #     print(f"\t{key} => {request.POST[key]}")
         request.POST = request.POST.copy() #create a mutable post
         request.POST['published'] = not getBool(request.POST['published'])
         auctionType = request.POST['type']
@@ -35,32 +70,28 @@ def home(request):
     auctionForms = [silentForm, liveForm]
 
     user = request.user
-    user.amount = 0
+    user.totalAmount = 0
+    user.liveAmount = 0
+    user.silentAmount = 0
     user.items = []
+    user.winningItems = []
     userBids = BidSilent.objects.filter(user__id=user.id)
     for bid in userBids:
         if bid.isWinning:
-            user.amount+=bid.amount
+            user.totalAmount+=bid.amount
+            user.silentAmount+=bid.amount
+            user.winningItems.append(bid.item)
     liveItems = LiveItem.objects.filter(user__id=user.id)
     for item in liveItems:
-        user.amount+=item.amount
+        user.totalAmount+=item.amount
+        user.liveAmount+=item.amount
         user.items.append(item)
-    print(user.amount)
+    print(user.totalAmount)
     user.save()
 
-    auctionTotalWinnings = 0
-    silentItemBids = BidSilent.objects.all()
-    for bid in silentItemBids:
-        if bid.isWinning:
-            auctionTotalWinnings += bid.amount
-
-    liveItems = LiveItem.objects.all()
-    for item in liveItems:
-        if item.sold:
-            auctionTotalWinnings+=item.amount
     context={"forms":auctionForms,
              "user": user,
-             "totalWinnings": auctionTotalWinnings} #data to send to the html page goes here
+             "dashboard": dashboard} #data to send to the html page goes here
     return render(request, 'home.html', context)
 
 
@@ -210,6 +241,7 @@ def payment(request):
         for bid in bids:
             if bid.isWinning:
                 user.amount += bid.amount
+                user.items.append(bid.item)
                 # print(bid.user, bid.amount)
 
         # for live
@@ -376,8 +408,21 @@ def submit_bid(request):
                 # this means invalid data was posted
                 print("invalid data")
 
-    return HttpResponseRedirect("/silent")
+    return redirect(silent)
 
+
+@login_required
+def updateSuperUser(request):
+    if request.user.is_superuser and request.method=="POST":
+        username = request.POST.get("username", False)
+        try: 
+            if username:
+                user = AuctionUser.objects.get(username=username)
+                user.is_superuser = not user.is_superuser
+                user.save()
+        except ValidationError:
+            messages.error(request, "Unable to update user.")
+    return redirect("users")
 
 @login_required
 def users(request):
