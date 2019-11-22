@@ -408,7 +408,7 @@ def submit_bid(request):
                 # this means invalid data was posted
                 print("invalid data")
 
-    return HttpResponseRedirect("/silent")
+    return redirect(silent)
 
 
 @login_required
