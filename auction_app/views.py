@@ -204,12 +204,19 @@ def live(request):
 
     # functionality
     createItemForm = LiveItemForm(initial={'auction':liveAuction})
-    currentItem = LiveItem.objects.filter(sold='False').order_by('pk').first()
+    if len(LiveItem.objects.filter(sold='False')) == 0:
+        allSold = True
+        currentItem = None
+    else:
+        allSold = False
+        currentItem = LiveItem.objects.filter(sold='False').order_by('pk').first()
+
     if liveAuction.published and len(LiveItem.objects.filter(sold='False')) != 0:
         items = LiveItem.objects.all().exclude(pk=currentItem.pk)
     else:
         items = LiveItem.objects.all()
     context = {
+        'allSold': allSold,
         'currentItem': currentItem,
         'published': liveAuction.published,
         'items': items,
