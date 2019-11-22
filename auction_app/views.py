@@ -49,7 +49,7 @@ def home(request):
         {
             "label": "Total Users",
             "value": totalUsers,
-        },  
+        },
         {
             "label": "Total amount Earned",
             "value": "$"+str(totalEarned),
@@ -81,12 +81,16 @@ def home(request):
             user.totalAmount+=bid.amount
             user.silentAmount+=bid.amount
             user.winningItems.append(bid.item)
+            bid.item.amount = bid.amount
+    user.save()
+    print(user.totalAmount)
     liveItems = LiveItem.objects.filter(user__id=user.id)
     for item in liveItems:
         user.totalAmount+=item.amount
         user.liveAmount+=item.amount
         user.items.append(item)
     user.save()
+    print(user.totalAmount)
 
     context={"forms":auctionForms,
              "user": user,
