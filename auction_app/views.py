@@ -49,7 +49,7 @@ def home(request):
         {
             "label": "Total Users",
             "value": totalUsers,
-        },  
+        },
         {
             "label": "Total amount Earned",
             "value": "$"+str(totalEarned),
@@ -83,13 +83,16 @@ def home(request):
             item = bid.item
             item.amount = bid.amount
             user.winningItems.append(bid.item)
-            
+            bid.item.amount = bid.amount
+    user.save()
+    print(user.totalAmount)
     liveItems = LiveItem.objects.filter(user__id=user.id)
     for item in liveItems:
         user.totalAmount+=item.amount
         user.liveAmount+=item.amount
         user.items.append(item)
     user.save()
+    print(user.totalAmount)
 
     context={"forms":auctionForms,
              "user": user,
@@ -203,12 +206,19 @@ def live(request):
 
     # functionality
     createItemForm = LiveItemForm(initial={'auction':liveAuction})
-    currentItem = LiveItem.objects.filter(sold='False').order_by('pk').first()
+    if len(LiveItem.objects.filter(sold='False')) == 0:
+        allSold = True
+        currentItem = None
+    else:
+        allSold = False
+        currentItem = LiveItem.objects.filter(sold='False').order_by('pk').first()
+
     if liveAuction.published and len(LiveItem.objects.filter(sold='False')) != 0:
         items = LiveItem.objects.all().exclude(pk=currentItem.pk)
     else:
         items = LiveItem.objects.all()
     context = {
+        'allSold': allSold,
         'currentItem': currentItem,
         'published': liveAuction.published,
         'items': items,
