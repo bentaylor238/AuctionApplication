@@ -80,6 +80,8 @@ def home(request):
         if bid.isWinning:
             user.totalAmount+=bid.amount
             user.silentAmount+=bid.amount
+            item = bid.item
+            item.amount = bid.amount
             user.winningItems.append(bid.item)
             bid.item.amount = bid.amount
     user.save()
@@ -115,7 +117,7 @@ def nukeDB():
 
 
 def init_test_db(request):
-    if DEBUG:
+    if ALLOW_DB_INIT:
         nukeDB()
         AuctionUser.objects.create_user(
             username="user1",

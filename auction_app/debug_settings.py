@@ -1,1 +1,1 @@
-DEBUG = True
+ALLOW_DB_INIT = False
