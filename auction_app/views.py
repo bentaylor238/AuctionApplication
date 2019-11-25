@@ -80,7 +80,10 @@ def home(request):
         if bid.isWinning:
             user.totalAmount+=bid.amount
             user.silentAmount+=bid.amount
+            item = bid.item
+            item.amount = bid.amount
             user.winningItems.append(bid.item)
+            
     liveItems = LiveItem.objects.filter(user__id=user.id)
     for item in liveItems:
         user.totalAmount+=item.amount

@@ -69,7 +69,7 @@
                             <div class="card-body">
                                 <img src="{{ item.image.url }}" class="card-img-top" alt="image"></img>
                                 <p>{{ item.description }}</p>
-                                <p>Current Bid: {{ bid }}</p>
+                                <p>Current Bid: {{ item.amount }}</p>
                             </div>
                         </td>
                     {% endfor %}
@@ -85,7 +85,7 @@
                             <div class="card-body">
                                 <img src="{{ item.image.url }}" class="card-img-top" alt="image"></img>
                                 <p>{{ item.description }}</p>
-                                <p>Current Bid: {{ bid }}</p>
+                                <p>Current Bid: {{ item.amount }}</p>
                             </div>
                         </td>
                     {% endfor %}
