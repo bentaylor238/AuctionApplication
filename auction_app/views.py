@@ -114,7 +114,7 @@ def nukeDB():
 
 
 def init_test_db(request):
-    if DEBUG:
+    if ALLOW_DB_INIT:
         nukeDB()
         AuctionUser.objects.create_user(
             username="user1",
