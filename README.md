@@ -1,3 +1,6 @@
+# Background
+This repository was developed by a team of four students, including myself, as a class project for CS3450, Introduction to Software Engineering, at Utah State University. The code was developed over the entire semester and provides a platform for small-scale, local auctions. The platform runs over a local networt and supports both live and silent auctions.
+
 ## An explanation of the organization and name scheme for the workspace
   ### /docs/
     This will contain all documentation information 
